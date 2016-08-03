@@ -69,5 +69,5 @@ task integrationTest(type: Test, dependsOn: 'test') {
   }
 }
 
-check.dependsOn integrationTest
-integrationTest.mustRunAfter test
+//integrationTest.dependsOn integrationTest
+//integrationTest.mustRunAfter test
