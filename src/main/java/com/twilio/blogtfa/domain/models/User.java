@@ -26,7 +26,8 @@ public class User {
   private String phoneNumber;
 
   // required by ORM
-  public User() { }
+  public User() {
+  }
 
   public User(final String username, final String password) {
     this.id = UUID.randomUUID().toString();

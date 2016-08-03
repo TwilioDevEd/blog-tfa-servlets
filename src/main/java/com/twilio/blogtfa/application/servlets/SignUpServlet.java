@@ -3,7 +3,7 @@ package com.twilio.blogtfa.application.servlets;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.twilio.blogtfa.domain.exceptions.DomainException;
+import com.twilio.blogtfa.application.util.ServletUtil;
 import com.twilio.blogtfa.domain.services.SignUp;
 
 import javax.servlet.ServletException;
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Singleton
-public class SignUpServlet  extends HttpServlet {
+public class SignUpServlet extends HttpServlet {
 
   private SignUp signUp;
 
@@ -38,9 +38,8 @@ public class SignUpServlet  extends HttpServlet {
     try {
       req.getSession().setAttribute("user", signUp.exec(username, password1, password2));
       resp.sendRedirect("/user/");
-    } catch (DomainException e) {
-      req.setAttribute("errorMessage", e.getMessage());
-      req.getRequestDispatcher("/WEB-INF/jsps/sign-up.jsp").forward(req, resp);
+    } catch (Exception e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/sign-up.jsp");
     }
   }
 }

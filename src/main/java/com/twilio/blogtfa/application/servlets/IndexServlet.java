@@ -3,6 +3,7 @@ package com.twilio.blogtfa.application.servlets;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.twilio.blogtfa.application.util.ServletUtil;
 import com.twilio.blogtfa.domain.exceptions.DomainException;
 import com.twilio.blogtfa.domain.services.LogIn;
 
@@ -39,8 +40,7 @@ public class IndexServlet extends HttpServlet {
       req.getSession().setAttribute("user", logIn.exec(username, password));
       resp.sendRedirect("/user/");
     } catch (DomainException e) {
-      req.setAttribute("errorMessage", e.getMessage());
-      req.getRequestDispatcher("/WEB-INF/jsps/index.jsp").forward(req, resp);
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
     }
   }
 }
