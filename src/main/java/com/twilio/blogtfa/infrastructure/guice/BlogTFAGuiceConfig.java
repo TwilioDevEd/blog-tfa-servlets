@@ -6,10 +6,12 @@ import com.google.inject.servlet.GuiceServletContextListener;
 
 public class BlogTFAGuiceConfig extends GuiceServletContextListener {
 
-    @Override
-    protected Injector getInjector() {
-        return Guice.createInjector(
-                new BlogTFAServletModule());
-    }
+  @Override
+  protected Injector getInjector() {
+    return Guice.createInjector(
+      new BlogTFAServletModule(),
+      new BlogTFARepositoryModule()
+    );
+  }
 
 }

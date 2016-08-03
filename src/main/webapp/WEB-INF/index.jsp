@@ -13,10 +13,11 @@
         <img src="/static/img/locked-screen.png" />
       </div>
       <div class="span6">
-        <c:if test="${invalidUserNameOrPassword == true}">
+
+        <c:if test="${errorMessage != null}">
           <div class="alert alert-error">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
-            Incorrect Username or Password.
+            <span id="error_message">${errorMessage}</span>
           </div>
         </c:if>
         <form method="POST">
