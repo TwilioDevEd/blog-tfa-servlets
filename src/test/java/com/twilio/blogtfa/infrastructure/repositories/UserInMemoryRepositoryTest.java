@@ -13,7 +13,7 @@ public class UserInMemoryRepositoryTest {
   private UserInMemoryRepository userInMemoryRepository;
 
   @Before
-  public void setUp(){
+  public void setUp() {
     this.userInMemoryRepository = new UserInMemoryRepository();
   }
 
