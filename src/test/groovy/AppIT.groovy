@@ -105,4 +105,17 @@ class AppIT extends GebReportingSpec {
       $('#logout').text() == 'Log out';
   }
 
+  def 'log out'() {
+    given:
+      go "${baseURI}"
+      $('form').username = 'user'
+      $('form').password = 'password'
+      $('form button[type=submit]').click()
+    when:
+      $('#logout').click();
+    then:
+      $('#logout').text() == null;
+      $('.well div h1').text() == 'Don\'t have an account?'
+  }
+
 }
