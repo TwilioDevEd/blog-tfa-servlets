@@ -48,4 +48,16 @@ class AppIT extends GebReportingSpec {
       $('#error_message').text() == null;
       $('#logged_in').text() == 'You are logged in.';
   }
+
+  def 'sign in with correct user (case insensitive) and password'() {
+    given:
+    go "${baseURI}"
+    $('form').username = 'uSeR'
+    $('form').password = 'password'
+    when:
+    $('form button[type=submit]').click()
+    then:
+    $('#error_message').text() == null;
+    $('#logged_in').text() == 'You are logged in.';
+  }
 }
