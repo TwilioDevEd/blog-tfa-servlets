@@ -3,6 +3,7 @@ package com.twilio.blogtfa.application.servlets;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.twilio.blogtfa.domain.models.User;
 import com.twilio.blogtfa.domain.repositories.UserRepository;
 
 import javax.servlet.ServletException;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Singleton
 public class SignUpServlet  extends HttpServlet {
@@ -36,6 +38,11 @@ public class SignUpServlet  extends HttpServlet {
 
     if (password1 != null && !password1.equals(password2)) {
       req.setAttribute("errorMessage", "Passwords do not match.");
+    } else {
+      Optional<User> optUser = userRepository.findByUsername(username);
+      if (optUser.isPresent()) {
+        req.setAttribute("errorMessage", "That username is already in use");
+      }
     }
     req.getRequestDispatcher("/WEB-INF/sign-up.jsp").forward(req, resp);
   }

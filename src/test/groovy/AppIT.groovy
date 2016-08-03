@@ -79,5 +79,15 @@ class AppIT extends GebReportingSpec {
       $('#error_message').text() == 'Passwords do not match.';
   }
 
-
+  def 'sign up with username that already exists'() {
+    given:
+      go "${baseURI}/sign-up/"
+      $('form').username = 'user'
+      $('form').password1 = 'password2'
+      $('form').password2 = 'password2'
+    when:
+      $('form button[type=submit]').click()
+    then:
+      $('#error_message').text() == 'That username is already in use';
+  }
 }
