@@ -38,6 +38,14 @@
             Two-Factor Authentication Example
           </a>
           <ul class="nav">
+            <c:if test="${sessionScope.user != null}">
+              <li>
+                <a href="/user/">Home</a>
+              </li>
+              <li>
+                <a id="logout" href="/logout/">Log out</a>
+              </li>
+            </c:if>
           </ul>
         </div>
       </div>

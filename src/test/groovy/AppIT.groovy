@@ -102,6 +102,7 @@ class AppIT extends GebReportingSpec {
     then:
       $('#error_message').text() == null
       $('#logged_in').text() == 'You are logged in.'
+      $('#logout').text() == 'Log out';
   }
 
 }
