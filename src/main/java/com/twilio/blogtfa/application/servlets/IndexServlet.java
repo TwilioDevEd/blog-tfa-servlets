@@ -13,12 +13,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Singleton
-public class MainPageServlet extends HttpServlet {
+public class IndexServlet extends HttpServlet {
 
   private LogIn logIn;
 
   @Inject
-  public MainPageServlet(LogIn logIn) {
+  public IndexServlet(LogIn logIn) {
     this.logIn = logIn;
   }
 
