@@ -10,7 +10,8 @@ public class BlogTFAGuiceConfig extends GuiceServletContextListener {
   protected Injector getInjector() {
     return Guice.createInjector(
       new BlogTFAServletModule(),
-      new BlogTFARepositoryModule()
+      new BlogTFARepositoryModule(),
+      new BlogTFAServiceModule()
     );
   }
 
