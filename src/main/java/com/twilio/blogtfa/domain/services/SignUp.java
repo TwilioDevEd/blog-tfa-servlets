@@ -2,6 +2,7 @@ package com.twilio.blogtfa.domain.services;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.persist.Transactional;
 import com.twilio.blogtfa.domain.exceptions.DomainException;
 import com.twilio.blogtfa.domain.models.User;
 import com.twilio.blogtfa.domain.repositories.UserRepository;
@@ -19,6 +20,7 @@ public class SignUp {
     this.userRepository = userRepository;
   }
 
+  @Transactional
   public User exec(@NotBlank(message = "Username cannot be empty") String username,
                    @NotBlank(message = "Password1 cannot be empty") String password1,
                    @NotBlank(message = "Password2 cannot be empty") String password2) {
