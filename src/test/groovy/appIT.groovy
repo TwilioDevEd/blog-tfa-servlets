@@ -6,6 +6,7 @@ class AppIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+
   }
 
   def 'should get default route'() {
@@ -15,7 +16,7 @@ class AppIT extends GebReportingSpec {
       $('.well div h1').text() == 'Don\'t have an account?'
   }
 
-  def 'sign in with invalid username or password'() {
+  def 'sign in with not existent username'() {
     given:
       go "${baseURI}"
     when:
@@ -23,5 +24,16 @@ class AppIT extends GebReportingSpec {
     then:
       $('#error_message').text() == 'Incorrect Username or Password';
 
+  }
+
+  def 'sign in with bad password'() {
+    given:
+      go "${baseURI}"
+      $('form').username = 'user'
+      $('form').password= 'badpassword'
+    when:
+      $('form button[type=submit]').click()
+    then:
+      $('#error_message').text() == 'Incorrect Username or Password';
   }
 }

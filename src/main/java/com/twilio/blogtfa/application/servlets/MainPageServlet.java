@@ -32,9 +32,14 @@ public class MainPageServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
-    Optional<User> user = userRepository.findByUsername(req.getParameter("username"));
-    if (!user.isPresent()) {
+    Optional<User> optUser = userRepository.findByUsername(req.getParameter("username"));
+    if (!optUser.isPresent()) {
       req.setAttribute("errorMessage", "Incorrect Username or Password");
+    } else {
+      User user = optUser.get();
+      if (!user.authenticate(req.getParameter("password"))) {
+        req.setAttribute("errorMessage", "Incorrect Username or Password");
+      }
     }
     req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
   }

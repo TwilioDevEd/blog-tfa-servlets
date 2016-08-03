@@ -23,9 +23,9 @@
         <form method="POST">
           <fieldset>
             <label>Username</label>
-            <input type="text" name="username">
+            <input id="username" type="text" name="username">
             <label>Password</label>
-            <input type="password" name="password">
+            <input id="password" type="password" name="password">
             <br/>
             <button type="submit" class="btn">Log in</button>
           </fieldset>
