@@ -6,10 +6,9 @@ class AppIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
-
   }
 
-  def 'should get default route'() {
+  def 'get default route'() {
     when:
       go "${baseURI}"
     then:
@@ -51,13 +50,21 @@ class AppIT extends GebReportingSpec {
 
   def 'sign in with correct user (case insensitive) and password'() {
     given:
-    go "${baseURI}"
-    $('form').username = 'uSeR'
-    $('form').password = 'password'
+      go "${baseURI}"
+      $('form').username = 'uSeR'
+      $('form').password = 'password'
     when:
-    $('form button[type=submit]').click()
+      $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == null;
-    $('#logged_in').text() == 'You are logged in.';
+      $('#error_message').text() == null;
+      $('#logged_in').text() == 'You are logged in.';
   }
+
+  def 'get sign up page'() {
+    when:
+      go "${baseURI}/sign-up/"
+    then:
+      $('#create_account').text() == 'Create an account'
+  }
+
 }
