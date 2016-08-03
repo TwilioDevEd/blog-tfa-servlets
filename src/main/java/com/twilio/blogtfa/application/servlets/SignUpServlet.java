@@ -27,4 +27,17 @@ public class SignUpServlet  extends HttpServlet {
     req.getRequestDispatcher("/WEB-INF/sign-up.jsp").forward(req, resp);
   }
 
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+    String username = req.getParameter("username");
+    String password1 = req.getParameter("password1");
+    String password2 = req.getParameter("password2");
+
+    if (password1 != null && !password1.equals(password2)) {
+      req.setAttribute("errorMessage", "Passwords do not match.");
+    }
+    req.getRequestDispatcher("/WEB-INF/sign-up.jsp").forward(req, resp);
+  }
+
 }

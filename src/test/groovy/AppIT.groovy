@@ -67,4 +67,17 @@ class AppIT extends GebReportingSpec {
       $('#create_account').text() == 'Create an account'
   }
 
+  def 'sign up with passwords not matching'() {
+    given:
+      go "${baseURI}/sign-up/"
+      $('form').username = 'user'
+      $('form').password1 = 'password1'
+      $('form').password2 = 'password2'
+    when:
+      $('form button[type=submit]').click()
+    then:
+      $('#error_message').text() == 'Passwords do not match.';
+  }
+
+
 }
