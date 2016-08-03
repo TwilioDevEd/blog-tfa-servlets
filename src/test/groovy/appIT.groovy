@@ -30,10 +30,22 @@ class AppIT extends GebReportingSpec {
     given:
       go "${baseURI}"
       $('form').username = 'user'
-      $('form').password= 'badpassword'
+      $('form').password = 'badpassword'
     when:
       $('form button[type=submit]').click()
     then:
       $('#error_message').text() == 'Incorrect Username or Password';
+  }
+
+  def 'sign in with correct user and password'() {
+    given:
+      go "${baseURI}"
+      $('form').username = 'user'
+      $('form').password = 'password'
+    when:
+      $('form button[type=submit]').click()
+    then:
+      $('#error_message').text() == null;
+      $('#logged_in').text() == 'You are logged in.';
   }
 }
