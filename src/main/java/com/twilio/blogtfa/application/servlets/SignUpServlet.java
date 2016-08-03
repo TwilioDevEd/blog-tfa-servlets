@@ -26,7 +26,7 @@ public class SignUpServlet  extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
-    req.getRequestDispatcher("/WEB-INF/sign-up.jsp").forward(req, resp);
+    req.getRequestDispatcher("/WEB-INF/jsps/sign-up.jsp").forward(req, resp);
   }
 
   @Override
@@ -35,16 +35,18 @@ public class SignUpServlet  extends HttpServlet {
     String username = req.getParameter("username");
     String password1 = req.getParameter("password1");
     String password2 = req.getParameter("password2");
+    Optional<User> optUser = userRepository.findByUsername(username);
 
-    if (password1 != null && !password1.equals(password2)) {
+    if (password1 != null && password2 != null && !password1.equals(password2)) {
       req.setAttribute("errorMessage", "Passwords do not match.");
+      req.getRequestDispatcher("/WEB-INF/jsps/sign-up.jsp").forward(req, resp);
+    } else if (optUser.isPresent()) {
+      req.setAttribute("errorMessage", "That username is already in use");
+      req.getRequestDispatcher("/WEB-INF/jsps/sign-up.jsp").forward(req, resp);
     } else {
-      Optional<User> optUser = userRepository.findByUsername(username);
-      if (optUser.isPresent()) {
-        req.setAttribute("errorMessage", "That username is already in use");
-      }
+      req.getSession().setAttribute("user", userRepository.save(new User(username, password1)));
+      resp.sendRedirect("/user/");
     }
-    req.getRequestDispatcher("/WEB-INF/sign-up.jsp").forward(req, resp);
   }
 
 }

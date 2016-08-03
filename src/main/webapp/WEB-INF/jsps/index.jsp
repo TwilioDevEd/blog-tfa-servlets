@@ -36,7 +36,7 @@
               Don't have an account?
             </h1>
           </div>
-          <a class="btn" href="/sign-up">
+          <a class="btn" href="/sign-up/">
             Sign up for an account here
           </a>
         </div>

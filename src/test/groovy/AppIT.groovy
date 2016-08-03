@@ -90,4 +90,18 @@ class AppIT extends GebReportingSpec {
     then:
       $('#error_message').text() == 'That username is already in use';
   }
+
+  def 'sign up with correct username and password'() {
+    given:
+      go "${baseURI}/sign-up/"
+      $('form').username = 'newuser'
+      $('form').password1 = 'password'
+      $('form').password2 = 'password'
+    when:
+      $('form button[type=submit]').click()
+    then:
+      $('#error_message').text() == null
+      $('#logged_in').text() == 'You are logged in.'
+  }
+
 }

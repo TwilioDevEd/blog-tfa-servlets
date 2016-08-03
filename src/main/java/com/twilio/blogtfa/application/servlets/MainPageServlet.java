@@ -35,17 +35,16 @@ public class MainPageServlet extends HttpServlet {
     Optional<User> optUser = userRepository.findByUsername(req.getParameter("username"));
     if (!optUser.isPresent()) {
       req.setAttribute("errorMessage", "Incorrect Username or Password");
-      req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
+      req.getRequestDispatcher("/WEB-INF/jsps/index.jsp").forward(req, resp);
     } else {
       User user = optUser.get();
       if (!user.authenticate(req.getParameter("password"))) {
         req.setAttribute("errorMessage", "Incorrect Username or Password");
-        req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/jsps/index.jsp").forward(req, resp);
       } else {
         req.getSession().setAttribute("user", user);
         resp.sendRedirect("/user/");
       }
     }
-
   }
 }
