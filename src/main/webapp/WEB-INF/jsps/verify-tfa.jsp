@@ -18,7 +18,7 @@
             <li>The SMS that was just sent to you</li>
           </c:if>
           <c:if test="${user != null && user.totpEnabledViaApp == true}">
-            <li>Google Authenticator</li>
+            <li id="google_authenticator">Google Authenticator</li>
           </c:if>
         </ul>
       </div>
@@ -34,7 +34,7 @@
         <p>
         ${user.username}
           <c:if test="${user != null && user.totpEnabledViaSms == true}">
-            <a id="verify-tfa-link" href="/verify-tfa/">
+            <a id="send-sms-again-link" href="/verify-tfa/">
               Send me an SMS with my verification code again.
             </a>
           </c:if>
