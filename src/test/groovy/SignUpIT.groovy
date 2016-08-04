@@ -24,7 +24,7 @@ class SignUpIT extends GebReportingSpec {
     when:
     $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == 'Passwords do not match.';
+    $('#error_message').text() == 'Passwords do not match.'
   }
 
   def 'sign up with username that already exists'() {
@@ -36,7 +36,7 @@ class SignUpIT extends GebReportingSpec {
     when:
     $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == 'That username is already in use';
+    $('#error_message').text() == 'That username is already in use'
   }
 
   def 'sign up with correct username and password'() {
@@ -50,7 +50,7 @@ class SignUpIT extends GebReportingSpec {
     then:
     $('#error_message').text() == null
     $('#logged_in').text() == 'You are logged in.'
-    $('#logout').text() == 'Log out';
+    $('#logout').text() == 'Log out'
   }
 
 }

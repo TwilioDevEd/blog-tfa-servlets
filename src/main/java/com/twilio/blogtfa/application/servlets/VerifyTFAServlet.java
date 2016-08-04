@@ -21,7 +21,8 @@ public class VerifyTFAServlet extends HttpServlet {
   }
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
     String username = (String) req.getSession().getAttribute("username");
     req.setAttribute("user", userRepository.findByUsername(username).get());
     req.getRequestDispatcher("/WEB-INF/jsps/verify-tfa.jsp").forward(req, resp);

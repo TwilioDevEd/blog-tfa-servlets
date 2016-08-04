@@ -14,7 +14,7 @@ class SignInIT extends GebReportingSpec {
     when:
     $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == 'Incorrect Username or Password';
+    $('#error_message').text() == 'Incorrect Username or Password'
   }
 
   def 'sign in with bad password'() {
@@ -25,7 +25,7 @@ class SignInIT extends GebReportingSpec {
     when:
     $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == 'Incorrect Username or Password';
+    $('#error_message').text() == 'Incorrect Username or Password'
   }
 
   def 'sign in with correct user and password'() {
@@ -36,8 +36,8 @@ class SignInIT extends GebReportingSpec {
     when:
     $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == null;
-    $('#logged_in').text() == 'You are logged in.';
+    $('#error_message').text() == null
+    $('#logged_in').text() == 'You are logged in.'
   }
 
   def 'sign in with correct user (case insensitive) and password'() {
@@ -48,7 +48,7 @@ class SignInIT extends GebReportingSpec {
     when:
     $('form button[type=submit]').click()
     then:
-    $('#error_message').text() == null;
-    $('#logged_in').text() == 'You are logged in.';
+    $('#error_message').text() == null
+    $('#logged_in').text() == 'You are logged in.'
   }
 }

@@ -139,7 +139,8 @@ public class User {
     }
 
     public User build() {
-      return new User(username, passwordHash, phoneNumber, totpSecret, totpEnabledViaApp, totpEnabledViaSms);
+      return new User(username, passwordHash, phoneNumber,
+        totpSecret, totpEnabledViaApp, totpEnabledViaSms);
     }
   }
 }
