@@ -7,6 +7,9 @@ class VerifyTFAIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+  }
+
+  void setup() {
     go "${baseURI}/test/set-up/"
   }
 
@@ -78,6 +81,21 @@ class VerifyTFAIT extends GebReportingSpec {
     then:
     $('#error_message').text() == null
     $('#you_are_set').text() == 'You are set up for Two-Factor Authentication via Google Authenticator!'
-    $('#install').text() == null
+  }
+
+  def 'enable tfa via app with incorrect token'() {
+    given:
+    go "${baseURI}"
+    $('form').username = 'user'
+    $('form').password = 'password'
+    $('form button[type=submit]').click()
+
+    go "${baseURI}/enable-tfa-via-app/"
+    $('form').token = "-1"
+    when:
+    $('form button[type=submit]').click()
+    then:
+    $('#error_message').text() == 'There was an error verifying your token. Please try again.'
+    $('#you_are_set').text() == null
   }
 }

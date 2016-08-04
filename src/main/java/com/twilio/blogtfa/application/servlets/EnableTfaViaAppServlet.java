@@ -43,7 +43,7 @@ public class EnableTfaViaAppServlet extends HttpServlet {
       req.getSession().setAttribute("user", userRepository.save(user));
       req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-app.jsp").forward(req, resp);
     } catch (DomainException e) {
-      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/enable-tfa-via-app.jsp");
     }
   }
 }

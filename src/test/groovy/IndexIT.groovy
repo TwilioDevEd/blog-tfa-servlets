@@ -6,6 +6,9 @@ class IndexIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+  }
+
+  void setup() {
     go "${baseURI}/test/set-up/"
   }
 
