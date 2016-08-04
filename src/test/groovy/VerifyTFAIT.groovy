@@ -98,4 +98,18 @@ class VerifyTFAIT extends GebReportingSpec {
     $('#error_message').text() == 'There was an error verifying your token. Please try again.'
     $('#you_are_set').text() == null
   }
+
+  def 'show enable tfa via sms page'() {
+    given:
+    go "${baseURI}"
+    $('form').username = 'user'
+    $('form').password = 'password'
+    $('form button[type=submit]').click()
+
+    when:
+    go "${baseURI}/enable-tfa-via-sms/"
+    then:
+    $('h1').text() == 'Enable SMS based Two-Factor Auth'
+  }
+
 }
