@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.twilio.blogtfa.application.util.ServletUtil;
 import com.twilio.blogtfa.domain.exceptions.DomainException;
+import com.twilio.blogtfa.domain.models.User;
 import com.twilio.blogtfa.domain.services.LogIn;
 
 import javax.servlet.ServletException;
@@ -37,8 +38,16 @@ public class IndexServlet extends HttpServlet {
     String password = req.getParameter("password");
 
     try {
-      req.getSession().setAttribute("user", logIn.exec(username, password));
-      resp.sendRedirect("/user/");
+      User user = logIn.exec(username, password);
+      if (user.isTFAEnabled()) {
+        req.getSession().setAttribute("username", username);
+        req.getSession().setAttribute("stage", "password-validated");
+        resp.sendRedirect("/verify-tfa/");
+      } else {
+        req.getSession().setAttribute("user", user);
+        resp.sendRedirect("/user/");
+      }
+
     } catch (DomainException e) {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
     }
