@@ -37,16 +37,16 @@
             </ol>
           </div>
           <form method="POST">
-            <fieldset>
+            <formset>
               <label>Your mobile phone number:</label>
               <input type="text" name="phoneNumber" placeholder="(415) 555-1212" />
               <button class="btn" type="submit">Send verification code</button>
-              <a class="btn" href="/user">Cancel</button>
+              <a class="btn" href="/user">Cancel</a>
               <label>Enter your verification code:</label>
               <input type="text" name="token" placeholder="123456" />
               <button class=".btn" type="submit">Submit and verify</button>
               <a class="btn" href="/user">Cancel</a>
-            </fieldset>
+            </formset>
           </form>
         </c:otherwise>
       </c:choose>

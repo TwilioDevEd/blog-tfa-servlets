@@ -96,6 +96,14 @@ public class User {
     this.totpEnabledViaSms = totpEnabledViaSms;
   }
 
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
   private User(String username, String passwordHash, String phoneNumber, String totpSecret,
                boolean totpEnabledViaApp, boolean totpEnabledViaSms) {
     this.id = UUID.randomUUID().toString();
