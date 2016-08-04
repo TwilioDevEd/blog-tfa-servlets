@@ -88,8 +88,16 @@ public class User {
     return isTotpEnabledViaApp() || isTotpEnabledViaSms();
   }
 
+  public void setTotpEnabledViaApp(boolean totpEnabledViaApp) {
+    this.totpEnabledViaApp = totpEnabledViaApp;
+  }
+
+  public void setTotpEnabledViaSms(boolean totpEnabledViaSms) {
+    this.totpEnabledViaSms = totpEnabledViaSms;
+  }
+
   private User(String username, String passwordHash, String phoneNumber, String totpSecret,
-       boolean totpEnabledViaApp, boolean totpEnabledViaSms) {
+               boolean totpEnabledViaApp, boolean totpEnabledViaSms) {
     this.id = UUID.randomUUID().toString();
     this.username = username;
     this.passwordHash = passwordHash;

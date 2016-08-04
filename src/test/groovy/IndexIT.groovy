@@ -6,6 +6,7 @@ class IndexIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+    go "${baseURI}/test/set-up/"
   }
 
   def 'get default route'() {

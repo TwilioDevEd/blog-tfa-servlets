@@ -1,4 +1,5 @@
 import geb.spock.GebReportingSpec
+import org.jboss.aerogear.security.otp.Totp
 
 class VerifyTFAIT extends GebReportingSpec {
 
@@ -6,6 +7,7 @@ class VerifyTFAIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+    go "${baseURI}/test/set-up/"
   }
 
   def 'sign in with app no sms no'() {
@@ -46,7 +48,7 @@ class VerifyTFAIT extends GebReportingSpec {
     $('#google_authenticator').text() == 'Google Authenticator'
   }
 
-  def 'enable tfa via app'() {
+  def 'open enable tfa via app page'() {
     given:
     go "${baseURI}"
     $('form').username = 'user'
@@ -59,5 +61,23 @@ class VerifyTFAIT extends GebReportingSpec {
     $('#verify-tfa-link').text() == null
     $('#install').text() == 'Install Google Authenticator'
     $('.container div h1').text() == 'Enable Google Authenticator'
+    $('#you_are_set').text() == null
+  }
+
+  def 'enable tfa via app with correct token'() {
+    given:
+    go "${baseURI}"
+    $('form').username = 'user'
+    $('form').password = 'password'
+    $('form button[type=submit]').click()
+
+    go "${baseURI}/enable-tfa-via-app/"
+    $('form').token = new Totp("R6LPJTVQXJFRYNDJ").now()
+    when:
+    $('form button[type=submit]').click()
+    then:
+    $('#error_message').text() == null
+    $('#you_are_set').text() == 'You are set up for Two-Factor Authentication via Google Authenticator!'
+    $('#install').text() == null
   }
 }

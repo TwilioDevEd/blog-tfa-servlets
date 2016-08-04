@@ -3,6 +3,7 @@ package com.twilio.blogtfa.infrastructure.guice;
 import com.google.inject.servlet.ServletModule;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaAppServlet;
 import com.twilio.blogtfa.application.servlets.IndexServlet;
+import com.twilio.blogtfa.application.servlets.IntegrationTestServlet;
 import com.twilio.blogtfa.application.servlets.LogoutServlet;
 import com.twilio.blogtfa.application.servlets.SignUpServlet;
 import com.twilio.blogtfa.application.servlets.UserServlet;
@@ -20,6 +21,7 @@ class BlogTFAServletModule extends ServletModule {
     serve("/logout/").with(LogoutServlet.class);
     serve("/verify-tfa/").with(VerifyTFAServlet.class);
     serve("/enable-tfa-via-app/").with(EnableTfaViaAppServlet.class);
+    serve("/test/set-up/").with(IntegrationTestServlet.class);
   }
 
 }

@@ -6,6 +6,7 @@ class SignUpIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+    go "${baseURI}/test/set-up/"
   }
 
   def 'get sign up page'() {

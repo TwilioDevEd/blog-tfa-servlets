@@ -6,6 +6,7 @@ class SignInIT extends GebReportingSpec {
 
   void setupSpec() {
     baseURI = System.getProperty('gretty.baseURI')
+    go "${baseURI}/test/set-up/"
   }
 
   def 'sign in with not existent username'() {

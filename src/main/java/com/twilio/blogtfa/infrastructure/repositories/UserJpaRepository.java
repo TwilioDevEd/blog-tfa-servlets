@@ -37,4 +37,14 @@ public class UserJpaRepository implements UserRepository {
       .stream()
       .findFirst();
   }
+
+  @Override
+  public void deleteAll() {
+    EntityManager entityManager = entityManagerProvider.get();
+    entityManager
+      .createQuery("SELECT u FROM User u")
+      .getResultList()
+      .stream()
+      .forEach(u -> entityManager.remove(u));
+  }
 }

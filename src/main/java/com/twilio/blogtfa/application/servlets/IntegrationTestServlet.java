@@ -1,28 +1,38 @@
-package com.twilio.blogtfa.infrastructure.repositories;
+package com.twilio.blogtfa.application.servlets;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.twilio.blogtfa.domain.models.User;
 import com.twilio.blogtfa.domain.repositories.UserRepository;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Singleton
-public class UserInMemoryRepository implements UserRepository {
+public class IntegrationTestServlet extends HttpServlet {
 
-  private Map<String, User> users = new HashMap<>();
+  private UserRepository userRepository;
   private ScriptEngine engine;
 
-  public UserInMemoryRepository() {
+  @Inject
+  public IntegrationTestServlet(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
     try {
+      userRepository.deleteAll();
+
       ScriptEngineManager sem = new ScriptEngineManager();
       this.engine = sem.getEngineByName("javascript");
       URL resource = getClass().getResource("/users-data.json");
@@ -41,30 +51,10 @@ public class UserInMemoryRepository implements UserRepository {
           .totpEnabledViaApp((Boolean) userMap.get("totpEnabledViaApp"))
           .totpEnabledViaSms((Boolean) userMap.get("totpEnabledViaSms"))
           .build();
-
-        users.put(user.getId(), user);
+        userRepository.save(user);
       });
-
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public User save(User user) {
-    users.put(user.getId(), user);
-    return user;
-  }
-
-  @Override
-  public Optional<User> findByUsername(String username) {
-    return users.values().stream()
-      .filter(user -> user.getUsername().equalsIgnoreCase(username))
-      .findFirst();
-  }
-
-  @Override
-  public void deleteAll() {
-    users.clear();
   }
 }
