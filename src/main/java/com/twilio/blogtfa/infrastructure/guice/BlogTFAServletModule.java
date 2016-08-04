@@ -21,7 +21,9 @@ class BlogTFAServletModule extends ServletModule {
     serve("/logout/").with(LogoutServlet.class);
     serve("/verify-tfa/").with(VerifyTFAServlet.class);
     serve("/enable-tfa-via-app/").with(EnableTfaViaAppServlet.class);
-    serve("/test/set-up/").with(IntegrationTestServlet.class);
+    if ("test".equals(System.getProperty("tfa"))) {
+      serve("/test/set-up/").with(IntegrationTestServlet.class);
+    }
   }
 
 }

@@ -58,6 +58,7 @@ test {
 gretty {
   contextPath = ''
   integrationTestTask = 'integrationTest'
+  systemProperty 'tfa', 'test'
 }
 
 task integrationTest(type: Test, dependsOn: 'test') {
@@ -67,6 +68,3 @@ task integrationTest(type: Test, dependsOn: 'test') {
     systemProperty 'geb.build.reportsDir', reporting.file('geb')
   }
 }
-
-//integrationTest.dependsOn integrationTest
-//integrationTest.mustRunAfter test
