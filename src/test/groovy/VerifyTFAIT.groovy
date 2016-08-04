@@ -46,5 +46,18 @@ class VerifyTFAIT extends GebReportingSpec {
     $('#google_authenticator').text() == 'Google Authenticator'
   }
 
-
+  def 'enable tfa via app'() {
+    given:
+    go "${baseURI}"
+    $('form').username = 'user'
+    $('form').password = 'password'
+    $('form button[type=submit]').click()
+    when:
+    go "${baseURI}/enable-tfa-via-app/"
+    then:
+    $('#error_message').text() == null
+    $('#verify-tfa-link').text() == null
+    $('#install').text() == 'Install Google Authenticator'
+    $('.container div h1').text() == 'Enable Google Authenticator'
+  }
 }
