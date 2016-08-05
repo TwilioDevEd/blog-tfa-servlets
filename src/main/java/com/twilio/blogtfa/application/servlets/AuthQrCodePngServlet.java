@@ -4,7 +4,7 @@ import com.google.inject.Singleton;
 import com.twilio.blogtfa.domain.models.User;
 import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
-import org.jboss.aerogear.security.otp.api.Base32;
+import org.jboss.aerogear.security.otp.Totp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +25,7 @@ public class AuthQrCodePngServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
     User user = (User) req.getSession().getAttribute("user");
-    String encoded = Base32.encode(user.getTotpSecret().getBytes());
-    String otpauthUrl = String.format("otpauth://totp/%s?secret=%s", user.getUsername(), encoded);
+    String otpauthUrl = new Totp(user.getTotpSecret()).uri(user.getUsername());
     LOGGER.info("otpauthUrl is {}", otpauthUrl);
 
     ByteArrayOutputStream out = QRCode.from(otpauthUrl)
