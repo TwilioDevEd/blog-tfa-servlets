@@ -2,6 +2,7 @@ package com.twilio.blogtfa.infrastructure.guice;
 
 import com.google.inject.persist.PersistFilter;
 import com.google.inject.servlet.ServletModule;
+import com.twilio.blogtfa.application.servlets.AuthQrCodePngServlet;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaAppServlet;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaSmsServlet;
 import com.twilio.blogtfa.application.servlets.IndexServlet;
@@ -32,6 +33,8 @@ class BlogTFAServletModule extends ServletModule {
     serve("/verify-tfa/").with(VerifyTFAServlet.class);
     serve("/enable-tfa-via-app/").with(EnableTfaViaAppServlet.class);
     serve("/enable-tfa-via-sms/").with(EnableTfaViaSmsServlet.class);
+    serve("/auth-qr-code.png").with(AuthQrCodePngServlet.class);
+
     if ("test".equals(blogTFAProperties.getProperty(ENVIRONMENT))) {
       serve("/test/set-up/").with(IntegrationTestServlet.class);
     }
