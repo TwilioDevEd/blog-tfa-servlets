@@ -10,17 +10,17 @@ import com.twilio.blogtfa.domain.repositories.UserRepository;
 public class EnableTfaViaSms {
 
   private UserRepository userRepository;
-  private ValidateToken validateToken;
+  private VerifyToken verifyToken;
 
   @Inject
-  public EnableTfaViaSms(UserRepository userRepository, ValidateToken validateToken) {
+  public EnableTfaViaSms(UserRepository userRepository, VerifyToken verifyToken) {
     this.userRepository = userRepository;
-    this.validateToken = validateToken;
+    this.verifyToken = verifyToken;
   }
 
   @Transactional
   public User exec(User user, String token) {
-    validateToken.exec(user, token);
+    verifyToken.exec(user, token);
     user.setTotpEnabledViaSms(true);
     return userRepository.save(user);
   }

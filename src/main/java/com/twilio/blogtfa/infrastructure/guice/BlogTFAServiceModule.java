@@ -9,7 +9,7 @@ import com.twilio.blogtfa.domain.services.EnableTfaViaSms;
 import com.twilio.blogtfa.domain.services.LogIn;
 import com.twilio.blogtfa.domain.services.SendSms;
 import com.twilio.blogtfa.domain.services.SignUp;
-import com.twilio.blogtfa.domain.services.ValidateToken;
+import com.twilio.blogtfa.domain.services.VerifyToken;
 import com.twilio.blogtfa.infrastructure.services.StubSMSSender;
 import com.twilio.blogtfa.infrastructure.services.TwilioSMSSender;
 import com.twilio.sdk.TwilioRestClient;
@@ -37,7 +37,7 @@ public class BlogTFAServiceModule extends AbstractModule {
       bind(SendSms.class).to(TwilioSMSSender.class);
     }
     bind(SignUp.class);
-    bind(ValidateToken.class);
+    bind(VerifyToken.class);
     bind(EnableTfaViaApp.class);
     bind(EnableTfaViaSms.class);
     bind(ConfigurePhoneNumber.class);

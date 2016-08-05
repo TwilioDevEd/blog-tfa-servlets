@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import com.twilio.blogtfa.application.util.ServletUtil;
 import com.twilio.blogtfa.domain.models.User;
 import com.twilio.blogtfa.domain.repositories.UserRepository;
-import com.twilio.blogtfa.domain.services.ValidateToken;
+import com.twilio.blogtfa.domain.services.VerifyToken;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -19,12 +19,12 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class VerifyTFAServlet extends HttpServlet {
 
   private UserRepository userRepository;
-  private ValidateToken validateToken;
+  private VerifyToken verifyToken;
 
   @Inject
-  public VerifyTFAServlet(UserRepository userRepository, ValidateToken validateToken) {
+  public VerifyTFAServlet(UserRepository userRepository, VerifyToken verifyToken) {
     this.userRepository = userRepository;
-    this.validateToken = validateToken;
+    this.verifyToken = verifyToken;
   }
 
   @Override
@@ -48,7 +48,7 @@ public class VerifyTFAServlet extends HttpServlet {
         User user = userRepository.findByUsername(username).get();
         req.setAttribute("user", user);
         String token = req.getParameter("token");
-        validateToken.exec(user, token);
+        verifyToken.exec(user, token);
         req.getSession().setAttribute("user", user);
         req.getSession().setAttribute("stage", "logged-in");
         resp.sendRedirect("/user/");

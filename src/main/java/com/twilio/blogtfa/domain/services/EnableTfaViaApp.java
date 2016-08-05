@@ -12,18 +12,18 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class EnableTfaViaApp {
 
-  private ValidateToken validateToken;
+  private VerifyToken verifyToken;
   private UserRepository userRepository;
 
   @Inject
-  public EnableTfaViaApp(ValidateToken validateToken, UserRepository userRepository) {
-    this.validateToken = validateToken;
+  public EnableTfaViaApp(VerifyToken verifyToken, UserRepository userRepository) {
+    this.verifyToken = verifyToken;
     this.userRepository = userRepository;
   }
 
   @Transactional
   public User exec(@NotNull User user, @NotEmpty String token) {
-    validateToken.exec(user, token);
+    verifyToken.exec(user, token);
     user.setTotpEnabledViaApp(true);
     return userRepository.save(user);
   }

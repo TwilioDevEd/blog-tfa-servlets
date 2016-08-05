@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class ValidateToken {
+public class VerifyToken {
 
   static final Logger LOGGER = LoggerFactory.getLogger(AuthQrCodePngServlet.class);
 
