@@ -11,9 +11,9 @@ public class BlogTFARepositoryModule extends AbstractModule {
   @Override
   protected void configure() {
     if ("test".equals(BlogTFAProperties.getProp(ENVIRONMENT))) {
-      install(new JpaPersistModule("jpa-blogtfa"));
-    } else {
       install(new JpaPersistModule("jpa-blogtfa-test"));
+    } else {
+      install(new JpaPersistModule("jpa-blogtfa"));
     }
 
     bind(UserRepository.class).to(UserJpaRepository.class);

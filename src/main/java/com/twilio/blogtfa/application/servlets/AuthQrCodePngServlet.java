@@ -24,9 +24,13 @@ public class AuthQrCodePngServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     User user = (User) req.getSession().getAttribute("user");
-    String otpauthUrl = new Totp(user.getTotpSecret()).uri(user.getUsername());
-    LOGGER.info("otpauthUrl is {}", otpauthUrl);
+    LOGGER.debug("generating for user with secret {}", user.getTotpSecret());
+    String secret = user.getTotpSecret();
+    Totp totp = new Totp(secret);
+    String otpauthUrl = totp.uri(user.getUsername());
+    LOGGER.debug("current otp {}", totp.now());
 
     ByteArrayOutputStream out = QRCode.from(otpauthUrl)
       .withSize(300, 300).to(ImageType.PNG).stream();
