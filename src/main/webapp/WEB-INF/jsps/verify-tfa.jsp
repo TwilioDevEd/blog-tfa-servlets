@@ -32,7 +32,6 @@
       </form>
       <div>
         <p>
-        ${user.username}
           <c:if test="${user != null && user.totpEnabledViaSms == true}">
             <a id="send-sms-again-link" href="/verify-tfa/">
               Send me an SMS with my verification code again.
