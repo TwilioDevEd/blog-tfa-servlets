@@ -28,8 +28,8 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
   private ConfigurePhoneNumber configurePhoneNumber;
 
   @Inject
-  public EnableTfaViaSmsServlet(SendSms sendSms,
-                                EnableTfaViaSms enableTfaViaSms, ConfigurePhoneNumber configurePhoneNumber) {
+  public EnableTfaViaSmsServlet(
+    SendSms sendSms, EnableTfaViaSms enableTfaViaSms, ConfigurePhoneNumber configurePhoneNumber) {
     this.sendSms = sendSms;
     this.enableTfaViaSms = enableTfaViaSms;
     this.configurePhoneNumber = configurePhoneNumber;
