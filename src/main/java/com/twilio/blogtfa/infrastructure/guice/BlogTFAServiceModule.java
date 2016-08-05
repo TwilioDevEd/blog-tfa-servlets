@@ -3,7 +3,9 @@ package com.twilio.blogtfa.infrastructure.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
+import com.twilio.blogtfa.domain.services.ConfigurePhoneNumber;
 import com.twilio.blogtfa.domain.services.EnableTfaViaApp;
+import com.twilio.blogtfa.domain.services.EnableTfaViaSms;
 import com.twilio.blogtfa.domain.services.LogIn;
 import com.twilio.blogtfa.domain.services.SendSms;
 import com.twilio.blogtfa.domain.services.SignUp;
@@ -37,6 +39,8 @@ public class BlogTFAServiceModule extends AbstractModule {
     bind(SignUp.class);
     bind(ValidateToken.class);
     bind(EnableTfaViaApp.class);
+    bind(EnableTfaViaSms.class);
+    bind(ConfigurePhoneNumber.class);
 
     install(new ImplicitValidationModule());
   }

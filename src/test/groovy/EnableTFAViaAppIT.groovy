@@ -35,7 +35,7 @@ class EnableTFAViaAppIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
-
+    and:
     go "${baseURI}/enable-tfa-via-app/"
     $('form').token = new Totp("R6LPJTVQXJFRYNDJ").now()
     when:

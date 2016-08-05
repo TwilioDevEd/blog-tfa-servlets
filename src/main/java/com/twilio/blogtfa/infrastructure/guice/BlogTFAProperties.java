@@ -22,7 +22,7 @@ class BlogTFAProperties extends Properties {
 
   BlogTFAProperties(final String accountSid, final String authToken,
                     final String phoneNumber, final String environment) {
-    if (Stream.of(accountSid, authToken, phoneNumber, environment)
+    if (Stream.of(accountSid, authToken, phoneNumber)
       .anyMatch(StringUtils::isEmpty)) {
       throw new IllegalArgumentException("All required environment variables must be set.");
     }
@@ -30,7 +30,7 @@ class BlogTFAProperties extends Properties {
     put(TWILIO_ACCOUNT_SID, accountSid);
     put(TWILIO_AUTH_TOKEN, authToken);
     put(TWILIO_PHONE_NUMBER, phoneNumber);
-    put(ENVIRONMENT, environment);
+    put(ENVIRONMENT, !StringUtils.isEmpty(environment) ? environment : "dev");
 
     LOGGER.info("TWILIO_ACCOUNT_SID={}", accountSid);
     LOGGER.info("TWILIO_AUTH_TOKEN={}", authToken);

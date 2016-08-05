@@ -1,4 +1,5 @@
 import geb.spock.GebReportingSpec
+import org.jboss.aerogear.security.otp.Totp
 
 class EnableTFAViaSmsIT extends GebReportingSpec {
 
@@ -24,16 +25,20 @@ class EnableTFAViaSmsIT extends GebReportingSpec {
     $('h1').text() == 'Enable SMS based Two-Factor Auth'
   }
 
+//  @Ignore
   def 'enable tfa via sms'() {
     given:
     go "${baseURI}"
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
-
+    and:
+    go "${baseURI}/enable-tfa-via-app/"
+    $('form').token = new Totp("R6LPJTVQXJFRYNDJ").now()
     when:
-    go "${baseURI}/enable-tfa-via-sms/"
+    $('form button[type=submit]').click()
     then:
-    $('h1').text() == 'Enable SMS based Two-Factor Auth'
+    $('#error_message').text() == null
+    $('#toptp_enabled_via_sms_message') == 'You are set up for Two-Factor Authentication via Twilio SMS!'
   }
 }

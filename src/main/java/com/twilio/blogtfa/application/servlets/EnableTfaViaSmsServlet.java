@@ -4,9 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.twilio.blogtfa.application.util.ServletUtil;
 import com.twilio.blogtfa.domain.models.User;
-import com.twilio.blogtfa.domain.repositories.UserRepository;
+import com.twilio.blogtfa.domain.services.ConfigurePhoneNumber;
+import com.twilio.blogtfa.domain.services.EnableTfaViaSms;
 import com.twilio.blogtfa.domain.services.SendSms;
-import com.twilio.blogtfa.domain.services.ValidateToken;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,21 +23,23 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
     + "phone number you entered. When you get the SMS, enter the code in the SMS where "
     + "it says \"Enter your verification code\" below.";
 
-  private UserRepository userRepository;
   private SendSms sendSms;
-  private ValidateToken validateToken;
+  private EnableTfaViaSms enableTfaViaSms;
+  private ConfigurePhoneNumber configurePhoneNumber;
 
   @Inject
-  public EnableTfaViaSmsServlet(
-    UserRepository userRepository, SendSms sendSms, ValidateToken validateToken) {
-    this.userRepository = userRepository;
+  public EnableTfaViaSmsServlet(SendSms sendSms,
+                                EnableTfaViaSms enableTfaViaSms, ConfigurePhoneNumber configurePhoneNumber) {
     this.sendSms = sendSms;
-    this.validateToken = validateToken;
+    this.enableTfaViaSms = enableTfaViaSms;
+    this.configurePhoneNumber = configurePhoneNumber;
   }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+    final User user = (User) req.getSession().getAttribute("user");
+    sendSms.exec(user);
     req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-sms.jsp").forward(req, resp);
   }
 
@@ -49,14 +51,11 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
     final User user = (User) req.getSession().getAttribute("user");
     try {
       if (!isEmpty(phoneNumber)) {
-        user.setPhoneNumber(phoneNumber);
-        userRepository.save(user);
+        configurePhoneNumber.exec(user, phoneNumber);
         sendSms.exec(user);
         req.setAttribute("successMessage", SMS_SENT_SUCCESS_MESSAGE);
       } else {
-        validateToken.exec(user, token);
-        user.setTotpEnabledViaSms(true);
-        req.getSession().setAttribute("user", userRepository.save(user));
+        req.getSession().setAttribute("user", enableTfaViaSms.exec(user, token));
       }
       req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-sms.jsp").forward(req, resp);
     } catch (Exception e) {
