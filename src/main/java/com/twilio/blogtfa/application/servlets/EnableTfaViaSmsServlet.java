@@ -23,7 +23,7 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
   private static final String SMS_SENT_SUCCESS_MESSAGE = "An SMS has been sent to the " +
     "phone number you entered. When you get the SMS, enter the code in the SMS where " +
     "it says \"Enter your verification code\" below.";
-  
+
   private UserRepository userRepository;
   private SendSms sendSms;
   private ValidateToken validateToken;

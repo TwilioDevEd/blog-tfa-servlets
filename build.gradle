@@ -56,9 +56,7 @@ test {
 }
 
 gretty {
-  contextPath = ''
-  integrationTestTask = 'integrationTest'
-  systemProperty 'tfa', 'test'
+  contextPath = '/'
 }
 
 task integrationTest(type: Test, dependsOn: 'test') {
@@ -67,4 +65,14 @@ task integrationTest(type: Test, dependsOn: 'test') {
   doFirst {
     systemProperty 'geb.build.reportsDir', reporting.file('geb')
   }
+}
+
+task acceptanceTest {
+  gretty.systemProperty 'TFA_ENV', 'test'
+  gretty.systemProperty 'TWILIO_ACCOUNT_SID', 'my-account-sid'
+  gretty.systemProperty 'TWILIO_AUTH_TOKEN', 'my-auth-token'
+  gretty.systemProperty 'TWILIO_PHONE_NUMBER', 'my-phone-number'
+  gretty.integrationTestTask = 'integrationTest'
+
+  finalizedBy integrationTest
 }

@@ -10,7 +10,15 @@ import com.twilio.blogtfa.application.servlets.SignUpServlet;
 import com.twilio.blogtfa.application.servlets.UserServlet;
 import com.twilio.blogtfa.application.servlets.VerifyTFAServlet;
 
+import static com.twilio.blogtfa.infrastructure.guice.BlogTFAProperties.ENVIRONMENT;
+
 class BlogTFAServletModule extends ServletModule {
+
+  private BlogTFAProperties blogTFAProperties;
+
+  public BlogTFAServletModule(BlogTFAProperties blogTFAProperties) {
+    this.blogTFAProperties = blogTFAProperties;
+  }
 
   @Override
   public void configureServlets() {
@@ -23,7 +31,7 @@ class BlogTFAServletModule extends ServletModule {
     serve("/verify-tfa/").with(VerifyTFAServlet.class);
     serve("/enable-tfa-via-app/").with(EnableTfaViaAppServlet.class);
     serve("/enable-tfa-via-sms/").with(EnableTfaViaSmsServlet.class);
-    if ("test".equals(System.getProperty("tfa"))) {
+    if ("test".equals(blogTFAProperties.getProperty(ENVIRONMENT))) {
       serve("/test/set-up/").with(IntegrationTestServlet.class);
     }
   }
