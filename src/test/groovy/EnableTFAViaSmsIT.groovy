@@ -1,5 +1,6 @@
 import geb.spock.GebReportingSpec
 import org.jboss.aerogear.security.otp.Totp
+import spock.lang.Ignore
 
 class EnableTFAViaSmsIT extends GebReportingSpec {
 
@@ -25,7 +26,7 @@ class EnableTFAViaSmsIT extends GebReportingSpec {
     $('h1').text() == 'Enable SMS based Two-Factor Auth'
   }
 
-//  @Ignore
+  @Ignore
   def 'enable tfa via sms'() {
     given:
     go "${baseURI}"
