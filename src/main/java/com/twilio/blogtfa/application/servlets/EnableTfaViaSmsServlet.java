@@ -14,22 +14,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton
 public class EnableTfaViaSmsServlet extends HttpServlet {
 
-  private static final String SMS_SENT_SUCCESS_MESSAGE = "An SMS has been sent to the " +
-    "phone number you entered. When you get the SMS, enter the code in the SMS where " +
-    "it says \"Enter your verification code\" below.";
+  private static final String SMS_SENT_SUCCESS_MESSAGE = "An SMS has been sent to the "
+    + "phone number you entered. When you get the SMS, enter the code in the SMS where "
+    + "it says \"Enter your verification code\" below.";
 
   private UserRepository userRepository;
   private SendSms sendSms;
   private ValidateToken validateToken;
 
   @Inject
-  public EnableTfaViaSmsServlet(UserRepository userRepository, SendSms sendSms, ValidateToken validateToken) {
+  public EnableTfaViaSmsServlet(
+    UserRepository userRepository, SendSms sendSms, ValidateToken validateToken) {
     this.userRepository = userRepository;
     this.sendSms = sendSms;
     this.validateToken = validateToken;
@@ -42,11 +42,10 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
   }
 
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
     final String phoneNumber = req.getParameter("phoneNumber");
     final String token = req.getParameter("token");
-    System.out.println(format("Params{phoneNumber=%s, token=%s}", phoneNumber, token));
-
     final User user = (User) req.getSession().getAttribute("user");
     try {
       if (!isEmpty(phoneNumber)) {

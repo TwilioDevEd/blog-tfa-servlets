@@ -5,11 +5,11 @@ import com.google.inject.servlet.ServletModule;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaAppServlet;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaSmsServlet;
 import com.twilio.blogtfa.application.servlets.IndexServlet;
-import com.twilio.blogtfa.infrastructure.test.IntegrationTestServlet;
 import com.twilio.blogtfa.application.servlets.LogoutServlet;
 import com.twilio.blogtfa.application.servlets.SignUpServlet;
 import com.twilio.blogtfa.application.servlets.UserServlet;
 import com.twilio.blogtfa.application.servlets.VerifyTFAServlet;
+import com.twilio.blogtfa.infrastructure.test.IntegrationTestServlet;
 
 import static com.twilio.blogtfa.infrastructure.guice.BlogTFAProperties.ENVIRONMENT;
 
