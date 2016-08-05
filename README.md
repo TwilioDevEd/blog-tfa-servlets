@@ -34,10 +34,10 @@
  [Twilio Account Settings](https://www.twilio.com/user/account/settings).
  You will also need a `TWILIO_NUMBER`, which you may find [here](https://www.twilio.com/user/account/phone-numbers/incoming).
 
-1. Make sure the tests succeed.
+1. Make sure the all tests succeed.
 
   ```bash
-  $ ./gradlew check
+  $ ./gradlew acceptanceTest
   ```
 
 1. Run the application.

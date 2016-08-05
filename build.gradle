@@ -1,0 +1,81 @@
+plugins {
+  id 'java'
+  id 'war'
+  id 'groovy'
+  id 'org.akhikhl.gretty' version '1.2.4'
+  id 'checkstyle'
+}
+
+checkstyle {
+  toolVersion = "6.1.1"
+}
+
+group 'com.twilio.blogtfa'
+version '1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+
+  compile 'org.slf4j:slf4j-api:1.7.21'
+  compile 'org.slf4j:slf4j-simple:1.7.21'
+  compile 'com.twilio.sdk:twilio-java-sdk:5.2.1'
+  compile 'com.google.inject.extensions:guice-servlet:4.0'
+  compile 'com.google.inject.extensions:guice-persist:4.0'
+  compile 'org.eclipse.persistence:javax.persistence:2.1.1'
+  compile 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.6.3'
+  compile 'org.xerial:sqlite-jdbc:3.8.11.2'
+  compile 'de.svenkubiak:jBCrypt:0.4'
+  compile 'ru.vyarus:guice-validator:1.2.0'
+  compile 'org.hibernate:hibernate-validator:5.2.4.Final'
+  compile 'javax.el:el-api:2.2.1-b04'
+  compile 'org.jboss.aerogear:aerogear-otp-java:1.0.0'
+  compile 'net.glxn:qrgen:1.4'
+
+  testCompile 'junit:junit:4.12'
+  testCompile "org.codehaus.groovy:groovy-all:2.4.7"
+  testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
+  testCompile "org.gebish:geb-spock:0.13.1"
+  testCompile "org.seleniumhq.selenium:selenium-support:2.53.1"
+  testCompile "org.seleniumhq.selenium:selenium-htmlunit-driver:2.52.0"
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.3'
+}
+
+test {
+  include '**/Test*.*'
+  include '**/*Test.*'
+  exclude '**/*IT.*'
+}
+
+gretty {
+  contextPath = '/'
+}
+
+task integrationTest(type: Test, dependsOn: 'test') {
+  outputs.upToDateWhen { false }
+  include '**/*IT.*'
+  doFirst {
+    systemProperty 'geb.build.reportsDir', reporting.file('geb')
+  }
+}
+
+task acceptanceTest {
+  doFirst {
+    gretty.systemProperty 'TFA_ENV', 'test'
+    gretty.systemProperty 'TWILIO_ACCOUNT_SID', 'my-account-sid'
+    gretty.systemProperty 'TWILIO_AUTH_TOKEN', 'my-auth-token'
+    gretty.systemProperty 'TWILIO_PHONE_NUMBER', 'my-phone-number'
+    gretty.integrationTestTask = 'integrationTest'
+  }
+  finalizedBy integrationTest
+}
