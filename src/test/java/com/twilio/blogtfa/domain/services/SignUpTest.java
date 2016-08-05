@@ -14,10 +14,17 @@ import static org.junit.Assert.fail;
 public class SignUpTest {
 
   private SignUp signUp;
+  private UserInMemoryRepository userRepository;
 
   @Before
   public void setUp() {
-    this.signUp = new SignUp(new UserInMemoryRepository());
+    userRepository = new UserInMemoryRepository();
+    userRepository.save(new User.Builder()
+      .username("user")
+      .passwordHash("$2a$12$J2dTN4wMH7nbVDgkYq/d8uTsiTw3DQHNF5Py98Mf27PJvnqkE94iK")
+      .build());
+
+    this.signUp = new SignUp(userRepository);
   }
 
   @Test

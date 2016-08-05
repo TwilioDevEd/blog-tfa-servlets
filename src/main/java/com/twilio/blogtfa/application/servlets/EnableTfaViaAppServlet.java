@@ -3,10 +3,8 @@ package com.twilio.blogtfa.application.servlets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.twilio.blogtfa.application.util.ServletUtil;
-import com.twilio.blogtfa.domain.exceptions.DomainException;
 import com.twilio.blogtfa.domain.models.User;
-import com.twilio.blogtfa.domain.repositories.UserRepository;
-import com.twilio.blogtfa.domain.services.ValidateToken;
+import com.twilio.blogtfa.domain.services.EnableTfaViaApp;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,13 +15,11 @@ import java.io.IOException;
 @Singleton
 public class EnableTfaViaAppServlet extends HttpServlet {
 
-  private UserRepository userRepository;
-  private ValidateToken validateToken;
+  private EnableTfaViaApp enableTfaViaApp;
 
   @Inject
-  public EnableTfaViaAppServlet(UserRepository userRepository, ValidateToken validateToken) {
-    this.userRepository = userRepository;
-    this.validateToken = validateToken;
+  public EnableTfaViaAppServlet(EnableTfaViaApp enableTfaViaApp) {
+    this.enableTfaViaApp = enableTfaViaApp;
   }
 
   @Override
@@ -38,9 +34,7 @@ public class EnableTfaViaAppServlet extends HttpServlet {
     String token = req.getParameter("token");
     User user = (User) req.getSession().getAttribute("user");
     try {
-      validateToken.exec(user, token);
-      user.setTotpEnabledViaApp(true);
-      req.getSession().setAttribute("user", userRepository.save(user));
+      req.getSession().setAttribute("user", enableTfaViaApp.exec(user, token));
       req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-app.jsp").forward(req, resp);
     } catch (Exception e) {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/enable-tfa-via-app.jsp");

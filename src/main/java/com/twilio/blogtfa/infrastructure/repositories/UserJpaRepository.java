@@ -32,7 +32,7 @@ public class UserJpaRepository implements UserRepository {
     EntityManager entityManager = entityManagerProvider.get();
     return entityManager
       .createQuery("SELECT u FROM User u WHERE u.username = :username")
-      .setParameter("username", username)
+      .setParameter("username", username.toLowerCase())
       .getResultList()
       .stream()
       .findFirst();

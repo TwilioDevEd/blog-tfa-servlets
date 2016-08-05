@@ -31,12 +31,4 @@ public class UserInMemoryRepositoryTest {
     assertTrue(user10.isPresent());
   }
 
-  @Test
-  public void shouldHaveDefaultData() {
-    Optional<User> user = this.userInMemoryRepository.findByUsername("user");
-    Optional<User> user2 = this.userInMemoryRepository.findByUsername("user2");
-    assertTrue(user.isPresent());
-    assertTrue(user2.isPresent());
-  }
-
 }
