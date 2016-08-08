@@ -25,12 +25,14 @@ public class EnableTfaViaAppServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-app.jsp").forward(req, resp);
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     String token = req.getParameter("token");
     User user = (User) req.getSession().getAttribute("user");
     try {
@@ -40,4 +42,5 @@ public class EnableTfaViaAppServlet extends HttpServlet {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/enable-tfa-via-app.jsp");
     }
   }
+
 }

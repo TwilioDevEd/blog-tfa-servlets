@@ -159,4 +159,5 @@ public class User {
         totpSecret, totpEnabledViaApp, totpEnabledViaSms);
     }
   }
+
 }

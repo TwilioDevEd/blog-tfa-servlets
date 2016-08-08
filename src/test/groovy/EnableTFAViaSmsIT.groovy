@@ -20,8 +20,10 @@ class EnableTFAViaSmsIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
+
     when:
     go "${baseURI}/enable-tfa-via-sms/"
+
     then:
     $('h1').text() == 'Enable SMS based Two-Factor Auth'
   }
@@ -33,13 +35,17 @@ class EnableTFAViaSmsIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
+
     and:
     go "${baseURI}/enable-tfa-via-app/"
     $('form').token = new Totp("R6LPJTVQXJFRYNDJ").now()
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#toptp_enabled_via_sms_message') == 'You are set up for Two-Factor Authentication via Twilio SMS!'
   }
+
 }

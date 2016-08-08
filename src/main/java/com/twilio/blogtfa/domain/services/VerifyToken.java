@@ -21,4 +21,5 @@ public class VerifyToken {
       throw new DomainException("There was an error verifying your token. Please try again.");
     }
   }
+
 }

@@ -19,8 +19,10 @@ class EnableTFAViaAppIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
+
     when:
     go "${baseURI}/enable-tfa-via-app/"
+
     then:
     $('#error_message').text() == null
     $('#verify-tfa-link').text() == null
@@ -35,11 +37,14 @@ class EnableTFAViaAppIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
+
     and:
     go "${baseURI}/enable-tfa-via-app/"
     $('form').token = new Totp("R6LPJTVQXJFRYNDJ").now()
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#you_are_set').text() == 'You are set up for Two-Factor Authentication via Google Authenticator!'
@@ -52,10 +57,13 @@ class EnableTFAViaAppIT extends GebReportingSpec {
     $('form').password = 'password'
     $('form button[type=submit]').click()
 
+    and:
     go "${baseURI}/enable-tfa-via-app/"
     $('form').token = "-1"
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == 'There was an error verifying your token. Please try again.'
     $('#you_are_set').text() == null

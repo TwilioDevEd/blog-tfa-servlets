@@ -47,8 +47,9 @@ public class LogInTest {
   }
 
   @Test
-  public void happyPath() {
+  public void shouldLogIn() {
     User user = this.logIn.exec("user", "password");
     assertThat(user, is(notNullValue()));
   }
+
 }

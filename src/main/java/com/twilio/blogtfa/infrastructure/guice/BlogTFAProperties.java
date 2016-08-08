@@ -41,4 +41,5 @@ class BlogTFAProperties extends Properties {
   static String getProp(String key) {
     return System.getProperty(key) != null ? System.getProperty(key) : System.getenv(key);
   }
+
 }

@@ -42,5 +42,6 @@ public class AuthQrCodePngServlet extends HttpServlet {
     os.flush();
     os.close();
   }
+
 }
 

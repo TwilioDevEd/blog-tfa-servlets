@@ -8,6 +8,7 @@ import com.twilio.blogtfa.infrastructure.repositories.UserJpaRepository;
 import static com.twilio.blogtfa.infrastructure.guice.BlogTFAProperties.ENVIRONMENT;
 
 public class BlogTFARepositoryModule extends AbstractModule {
+
   @Override
   protected void configure() {
     if ("test".equals(BlogTFAProperties.getProp(ENVIRONMENT))) {
@@ -18,4 +19,5 @@ public class BlogTFARepositoryModule extends AbstractModule {
 
     bind(UserRepository.class).to(UserJpaRepository.class);
   }
+
 }

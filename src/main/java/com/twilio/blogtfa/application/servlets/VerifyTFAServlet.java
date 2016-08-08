@@ -30,6 +30,7 @@ public class VerifyTFAServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     String username = (String) req.getSession().getAttribute("username");
     req.setAttribute("user", userRepository.findByUsername(username).get());
     req.getRequestDispatcher("/WEB-INF/jsps/verify-tfa.jsp").forward(req, resp);
@@ -38,6 +39,7 @@ public class VerifyTFAServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     String username = (String) req.getSession().getAttribute("username");
     try {
       if (isEmpty(username)) {
@@ -57,4 +59,5 @@ public class VerifyTFAServlet extends HttpServlet {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/verify-tfa.jsp");
     }
   }
+
 }

@@ -15,4 +15,5 @@ public final class ValidationUtil {
       .reduce((s, s2) -> s + s2)
       .get());
   }
+
 }

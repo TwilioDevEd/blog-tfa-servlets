@@ -15,6 +15,7 @@ class IndexIT extends GebReportingSpec {
   def 'get default route'() {
     when:
     go "${baseURI}"
+
     then:
     $('.well div h1').text() == 'Don\'t have an account?'
   }

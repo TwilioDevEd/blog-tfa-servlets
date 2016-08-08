@@ -38,6 +38,7 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     final User user = (User) req.getSession().getAttribute("user");
     sendSms.exec(user);
     req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-sms.jsp").forward(req, resp);
@@ -46,6 +47,7 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     final String phoneNumber = req.getParameter("phoneNumber");
     final String token = req.getParameter("token");
     final User user = (User) req.getSession().getAttribute("user");
@@ -62,4 +64,5 @@ public class EnableTfaViaSmsServlet extends HttpServlet {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/enable-tfa-via-sms.jsp");
     }
   }
+
 }

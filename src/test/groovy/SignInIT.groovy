@@ -15,8 +15,10 @@ class SignInIT extends GebReportingSpec {
   def 'sign in with not existent username'() {
     given:
     go "${baseURI}"
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == 'Incorrect Username or Password'
   }
@@ -26,8 +28,10 @@ class SignInIT extends GebReportingSpec {
     go "${baseURI}"
     $('form').username = 'user'
     $('form').password = 'badpassword'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == 'Incorrect Username or Password'
   }
@@ -37,8 +41,10 @@ class SignInIT extends GebReportingSpec {
     go "${baseURI}"
     $('form').username = 'user'
     $('form').password = 'password'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#logged_in').text() == 'You are logged in.'
@@ -49,10 +55,13 @@ class SignInIT extends GebReportingSpec {
     go "${baseURI}"
     $('form').username = 'uSeR'
     $('form').password = 'password'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#logged_in').text() == 'You are logged in.'
   }
+
 }

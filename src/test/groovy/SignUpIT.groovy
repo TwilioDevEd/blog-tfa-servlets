@@ -15,6 +15,7 @@ class SignUpIT extends GebReportingSpec {
   def 'get sign up page'() {
     when:
     go "${baseURI}/sign-up/"
+
     then:
     $('#create_account').text() == 'Create an account'
   }
@@ -25,8 +26,10 @@ class SignUpIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password1 = 'password1'
     $('form').password2 = 'password2'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == 'Passwords do not match.'
   }
@@ -37,8 +40,10 @@ class SignUpIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password1 = 'password2'
     $('form').password2 = 'password2'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == 'That username is already in use'
   }
@@ -49,8 +54,10 @@ class SignUpIT extends GebReportingSpec {
     $('form').username = 'newuser'
     $('form').password1 = 'password'
     $('form').password2 = 'password'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#logged_in').text() == 'You are logged in.'

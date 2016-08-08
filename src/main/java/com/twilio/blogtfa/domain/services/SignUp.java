@@ -26,7 +26,7 @@ public class SignUp {
                    @NotBlank(message = "Password2 cannot be empty") String password2) {
     Optional<User> optUser = userRepository.findByUsername(username);
 
-    if (password1 != null && password2 != null && !password1.equals(password2)) {
+    if (!password1.equals(password2)) {
       throw new DomainException("Passwords do not match.");
     } else if (optUser.isPresent()) {
       throw new DomainException("That username is already in use");
@@ -34,4 +34,5 @@ public class SignUp {
       return userRepository.save(new User(username, password1));
     }
   }
+
 }
