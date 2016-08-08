@@ -40,15 +40,8 @@ public class IndexServlet extends HttpServlet {
 
     try {
       User user = logIn.exec(username, password);
-      if (user.isTFAEnabled()) {
-        req.getSession().setAttribute("username", username);
-        req.getSession().setAttribute("stage", "password-validated");
-        resp.sendRedirect("/verify-tfa/");
-      } else {
-        req.getSession().setAttribute("user", user);
-        resp.sendRedirect("/user/");
-      }
-
+      req.getSession().setAttribute("user", user);
+      resp.sendRedirect("/user/");
     } catch (DomainException e) {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
     }

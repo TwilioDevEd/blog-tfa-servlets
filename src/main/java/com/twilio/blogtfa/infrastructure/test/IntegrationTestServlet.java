@@ -61,10 +61,6 @@ public class IntegrationTestServlet extends HttpServlet {
     User user = new User.Builder()
       .username((String) userMap.get("username"))
       .passwordHash((String) userMap.get("passwordHash"))
-      .phoneNumber((String) userMap.get("phoneNumber"))
-      .totpSecret((String) userMap.get("totpSecret"))
-      .totpEnabledViaApp((Boolean) userMap.get("totpEnabledViaApp"))
-      .totpEnabledViaSms((Boolean) userMap.get("totpEnabledViaSms"))
       .build();
     userRepository.save(user);
   }

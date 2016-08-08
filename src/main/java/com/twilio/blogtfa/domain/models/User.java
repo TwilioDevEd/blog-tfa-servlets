@@ -24,18 +24,6 @@ public class User {
   @NotBlank(message = "Password may not be blank")
   private String passwordHash;
 
-  @Column(name = "PHONE_NUMBER")
-  private String phoneNumber;
-
-  @Column(name = "TOTP_SECRET")
-  private String totpSecret;
-
-  @Column(name = "TOTP_ENABLED_VIA_APP")
-  private boolean totpEnabledViaApp;
-
-  @Column(name = "TOTP_ENABLED_VIA_SMS")
-  private boolean totpEnabledViaSms;
-
   // required by ORM
   public User() {
   }
@@ -44,9 +32,6 @@ public class User {
     this.id = UUID.randomUUID().toString();
     this.username = username;
     this.passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
-    this.totpEnabledViaApp = false;
-    this.totpEnabledViaSms = false;
-    this.totpSecret = generateRandomSecret();
   }
 
   // Generates random base 32 secret compatible to Google Authenticator
@@ -72,57 +57,16 @@ public class User {
     return id;
   }
 
-  public String getTotpSecret() {
-    return totpSecret;
-  }
-
-  public boolean isTotpEnabledViaSms() {
-    return totpEnabledViaSms;
-  }
-
-  public boolean isTotpEnabledViaApp() {
-    return totpEnabledViaApp;
-  }
-
-  public boolean isTFAEnabled() {
-    return isTotpEnabledViaApp() || isTotpEnabledViaSms();
-  }
-
-  public void setTotpEnabledViaApp(boolean totpEnabledViaApp) {
-    this.totpEnabledViaApp = totpEnabledViaApp;
-  }
-
-  public void setTotpEnabledViaSms(boolean totpEnabledViaSms) {
-    this.totpEnabledViaSms = totpEnabledViaSms;
-  }
-
-  public String getPhoneNumber() {
-    return phoneNumber;
-  }
-
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
-  }
-
-  private User(String username, String passwordHash, String phoneNumber, String totpSecret,
-               boolean totpEnabledViaApp, boolean totpEnabledViaSms) {
-    this.id = UUID.randomUUID().toString();
+  private User(String id, String username, String passwordHash) {
+    this.id = id;
     this.username = username;
     this.passwordHash = passwordHash;
-    this.phoneNumber = phoneNumber;
-    this.totpSecret = totpSecret;
-    this.totpEnabledViaApp = totpEnabledViaApp;
-    this.totpEnabledViaSms = totpEnabledViaSms;
   }
 
   public static class Builder {
 
     private String username;
     private String passwordHash;
-    private String phoneNumber;
-    private String totpSecret;
-    private boolean totpEnabledViaApp;
-    private boolean totpEnabledViaSms;
 
     public Builder username(String username) {
       this.username = username;
@@ -134,29 +78,8 @@ public class User {
       return this;
     }
 
-    public Builder phoneNumber(String phoneNumber) {
-      this.phoneNumber = phoneNumber;
-      return this;
-    }
-
-    public Builder totpSecret(String totpSecret) {
-      this.totpSecret = totpSecret;
-      return this;
-    }
-
-    public Builder totpEnabledViaApp(boolean totpEnabledViaApp) {
-      this.totpEnabledViaApp = totpEnabledViaApp;
-      return this;
-    }
-
-    public Builder totpEnabledViaSms(boolean totpEnabledViaSms) {
-      this.totpEnabledViaSms = totpEnabledViaSms;
-      return this;
-    }
-
     public User build() {
-      return new User(username, passwordHash, phoneNumber,
-        totpSecret, totpEnabledViaApp, totpEnabledViaSms);
+      return new User(UUID.randomUUID().toString(), username, passwordHash);
     }
   }
 

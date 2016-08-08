@@ -10,3 +10,4 @@ target/
 .env
 out/
 /.nb-gradle/
+classes/
