@@ -1,0 +1,1010 @@
+<a href="https://www.twilio.com/blog/2013/04/add-two-factor-authentication-to-your-website-with-google-authenticator-and-twilio-sms.html/jf-2" rel="attachment wp-att-11918"><img class="alignright size-full wp-image-11918" src="https://www.twilio.com/blog/wp-content/uploads/2013/04/jf1.jpg" alt="jf" width="288" height="162" /></a><em>Since writing this post, we’ve created a new tutorial showing you how to <a href="https://www.twilio.com/docs/tutorials/walkthrough/sms-two-factor-authentication/java/servlets/">quickly add two-factor authentication to your applications</a> updated with some more recent techniques not highlighted below.</em>
+
+<strong>Check out the newest TFA Tutorial <a href="https://www.twilio.com/docs/tutorials/walkthrough/two-factor-authentication/java/servlets/">here</a></strong>
+<h3>Why Two-Factor Authentication?</h3>
+Back in the day, it used to be that enforcing a strong password policy was sufficient to prevent unauthorized access into your user's accounts. (Ah, those were the days, <a href="http://angg.twu.net/tourism.html">when kids were polite and respected their elders</a>). However, as the security landscape continues to evolve, it is becoming clear that a strong password policy is not enough any more. Today, an attacker can discover your user's password in a variety of ways: they might find your user's password on a stolen or lost computer, they might find their password on another site where your user used the same password, or your user's computer might be infected with a virus that is capturing their keystrokes.
+
+In an ideal world, we would all be authenticating ourselves using tamper-proof hardware that implements a public-key cryptographic system. In the meantime, a simple and effective way of improving the way your users authenticate themselves is a method known as "<a href="http://www.twilio.com/solutions/two-factor-authentication">Two-Factor Authentication</a>", "Two-Factor Auth", or just "TFA". Two-Factor Authentication is a method where your users are required to log in with two "factors": a password, and a code from a device that they carry on their person. That device used to be a special-purpose device, but these days that device can just as well be a mobile phone.
+
+A great pattern that we are seeing for implementing <a href="http://www.twilio.com/solutions/two-factor-authentication">two-factor authentication</a> is to use the TOTP (Time-based One-time Password Algorithm) standard for the second authentication step. What is so cool about TOTP is that it is flexible enough to allow your users to generate their authentication tokens directly on their smart phones using a TOTP app like <a href="http://support.google.com/accounts/bin/answer.py?hl=en&amp;answer=1066447">Google Authenticator</a> or have their tokens sent to their mobile phone via SMS.
+
+This means that you only need to implement and test one additional authentication scheme, but get the benefits of having two different ways that your users can get tokens.
+
+The best way to see how this is done is to look at some code. Let's do that now.
+
+Here are the topics that I'll be covering:
+<ol>
+  <li><b>An Example of Application</b>
+I will start with a very basic Java/Servlets application that implements password authentication and build from there.</li>
+  <li><b>Understanding TOTP</b>
+Before I show you how to add TOTP to that example application, I'll explain how TOTP works.</li>
+  <li><b>Adding Two-Factor Authentication</b>
+Now that we know more about how TOTP works, I'll show you how to add it to the example application that we started with.</li>
+  <li><b>Adding Google Authenticator</b>
+Here I will show you how to enable your users to authenticate via the Google Authenticator.</li>
+  <li><b>Adding Twilio</b>
+Here I will show you how to enable your users to authenticate using a code that is delivered to their phone via SMS.</li>
+  <li><b>Try It Out Yourself</b>
+Finally, I give you a working example of a site that can use both the Google Authenticator and SMS to do two-factor authentication.</li>
+</ol>
+&nbsp;
+<h3>An Example of An Application</h3>
+Below is the code for a very basic website that only uses a username and password for authentication. We will start with this code, and then add two-factor authentication to it.
+
+Below you can see the main classes:
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/filters/AuthenticationFilter.java">AuthenticationFilter.java</a>:
+
+[code language="java"]
+// imports ...
+
+@Singleton
+public class AuthenticationFilter implements Filter {
+
+  @Override
+  public void doFilter(final ServletRequest request, final ServletResponse response,
+                       final FilterChain chain) throws IOException, ServletException {
+
+    HttpServletRequest httpRequest = (HttpServletRequest) request;
+    HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+    if (!isAuthenticated(httpRequest)) {
+      httpResponse.sendRedirect("/");
+    } else {
+      chain.doFilter(request, response);
+    }
+  }
+
+  private boolean isAuthenticated(final HttpServletRequest request) {
+    return request.getSession().getAttribute("user") != null;
+  }
+
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException { }
+
+  @Override
+  public void destroy() { }
+
+}
+
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+@Singleton
+public class IndexServlet extends HttpServlet {
+
+  private LogIn logIn;
+
+  @Inject
+  public IndexServlet(LogIn logIn) {
+    this.logIn = logIn;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String username = req.getParameter("username");
+    String password = req.getParameter("password");
+
+    try {
+      User user = logIn.exec(username, password);
+      req.getSession().setAttribute("user", user);
+      resp.sendRedirect("/user/");
+    } catch (DomainException e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
+    }
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/LogoutServlet.java">LogoutServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+@Singleton
+public class LogoutServlet extends HttpServlet {
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+    req.getSession().invalidate();
+    resp.sendRedirect("/");
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/SignUpServlet.java">SignUpServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+@Singleton
+public class SignUpServlet extends HttpServlet {
+
+  private SignUp signUp;
+
+  @Inject
+  public SignUpServlet(SignUp signUp) {
+    this.signUp = signUp;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/jsps/sign-up.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+    String username = req.getParameter("username");
+    String password1 = req.getParameter("password1");
+    String password2 = req.getParameter("password2");
+
+    try {
+      req.getSession().setAttribute("user", signUp.exec(username, password1, password2));
+      resp.sendRedirect("/user/");
+    } catch (Exception e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/sign-up.jsp");
+    }
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/UserServlet.java">UserServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+@Singleton
+public class UserServlet extends HttpServlet {
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/jsps/user.jsp").forward(req, resp);
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/models/User.java>User.java</a>:
+
+[code language="java"]
+// imports ...
+@Entity
+public class User {
+
+  @Id
+  private String id;
+
+  @Column(name = "USER_NAME")
+  @NotBlank(message = "Username may not be blank")
+  private String username;
+
+  @Column(name = "PASSWORD_HASH")
+  @NotBlank(message = "Password may not be blank")
+  private String passwordHash;
+
+  // required by ORM
+  public User() {
+  }
+
+  public User(final String username, final String password) {
+    this.id = UUID.randomUUID().toString();
+    this.username = username;
+    this.passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
+  }
+
+  // Generates random base 32 secret compatible to Google Authenticator
+  private String generateRandomSecret() {
+    return IntStream.range(0, 16)
+      .mapToObj(i -> {
+        final String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        final Random random = new Random();
+        return String.valueOf(chars.charAt(random.nextInt(chars.length())));
+      })
+      .reduce((a, b) -> a + b).get();
+  }
+
+  public boolean authenticate(final String password) {
+    return BCrypt.checkpw(password, this.passwordHash);
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  // etc...
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/repositories/UserRepository.java">UserRepository.java</a>:
+
+[code language="java"]
+// imports ...
+public interface UserRepository {
+
+  User save(User user);
+
+  Optional<User> findByUsername(String username);
+
+  void deleteAll();
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/services/LogIn.java">LogIn.java</a>:
+
+[code language="java"]
+// imports ...
+@Singleton
+public class LogIn {
+
+  private UserRepository userRepository;
+
+  @Inject
+  public LogIn(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  public User exec(String username, String password) {
+    Optional<User> optUser = userRepository.findByUsername(username);
+    if (!optUser.isPresent()) {
+      throw new DomainException("Incorrect Username or Password");
+    } else {
+      User user = optUser.get();
+      if (!user.authenticate(password)) {
+        throw new DomainException("Incorrect Username or Password");
+      } else {
+        return user;
+      }
+    }
+  }
+
+}
+
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/services/SignUp.java">SignUp.java</a>:
+
+[code language="java"]
+// imports ...
+
+@Singleton
+public class SignUp {
+
+  private UserRepository userRepository;
+
+  @Inject
+  public SignUp(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  @Transactional
+  public User exec(@NotBlank(message = "Username cannot be empty") String username,
+                   @NotBlank(message = "Password1 cannot be empty") String password1,
+                   @NotBlank(message = "Password2 cannot be empty") String password2) {
+    Optional<User> optUser = userRepository.findByUsername(username);
+
+    if (!password1.equals(password2)) {
+      throw new DomainException("Passwords do not match.");
+    } else if (optUser.isPresent()) {
+      throw new DomainException("That username is already in use");
+    } else {
+      return userRepository.save(new User(username, password1));
+    }
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
+
+[code language="java"]
+// imports ...
+
+
+[/code]
+
+<a href="https://raw.githubusercontent.com/TwilioDevEd/blog-tfa-servlets/no-tfa/src/main/java/com/twilio/blogtfa/infrastructure/guice/BlogTFAServletModule.java">BlogTFAServletModule.java</a>:
+
+[code language="java"]
+// imports ...
+class BlogTFAServletModule extends ServletModule {
+
+  private BlogTFAProperties blogTFAProperties;
+
+  public BlogTFAServletModule(BlogTFAProperties blogTFAProperties) {
+    this.blogTFAProperties = blogTFAProperties;
+  }
+
+  @Override
+  public void configureServlets() {
+    filter("/*").through(PersistFilter.class);
+
+    filter("/user/").through(AuthenticationFilter.class);
+
+    serve("/").with(IndexServlet.class);
+    serve("/user/").with(UserServlet.class);
+    serve("/sign-up/").with(SignUpServlet.class);
+    serve("/logout/").with(LogoutServlet.class);
+
+    if ("test".equals(blogTFAProperties.getProperty(ENVIRONMENT))) {
+      serve("/test/set-up/").with(IntegrationTestServlet.class);
+    }
+  }
+
+}
+
+[/code]
+
+
+&nbsp;
+
+If you don't want to read over everything, you can just focus on the <em>IndexServlet</em> class, here:
+
+[code language="java"]
+@Singleton
+public class IndexServlet extends HttpServlet {
+
+  private LogIn logIn;
+
+  @Inject
+  public IndexServlet(LogIn logIn) {
+    this.logIn = logIn;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String username = req.getParameter("username");
+    String password = req.getParameter("password");
+
+    try {
+      User user = logIn.exec(username, password);
+      req.getSession().setAttribute("user", user);
+      resp.sendRedirect("/user/");
+    } catch (DomainException e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
+    }
+  }
+
+}
+[/code]
+
+If you're new to Java or Servlets, here is what's going on in the code:
+
+Respectively, the doGet and doPost methods respectively handle GET and POST requests for '/' (the main page).
+
+So, if it receives a GET request to this path '/', it will render index.jsp.
+
+However, if it receives a POST request, it will response with a another logic. We check to see if the user or password are invalid. If the user or password are not valid, then the LogIn classe throws a Domain exception and we display an error saying that they are not valid. Otherwise, we log the user in.
+
+[code language="java"]
+@Singleton
+public class LogIn {
+
+  private UserRepository userRepository;
+
+  @Inject
+  public LogIn(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  public User exec(String username, String password) {
+    Optional<User> optUser = userRepository.findByUsername(username);
+    if (!optUser.isPresent()) {
+      throw new DomainException("Incorrect Username or Password");
+    } else {
+      User user = optUser.get();
+      if (!user.authenticate(password)) {
+        throw new DomainException("Incorrect Username or Password");
+      } else {
+        return user;
+      }
+    }
+  }
+
+}
+[/code]
+
+The rest of the code in this example deals with including additional libraries, setting up the application, defining the User model and handling other website functionality.
+
+You can see the full source on GitHub here: <a href="https://github.com/Twilio-Dev-Ed/blog-tfa-servlets/tree/no-tfa">https://github.com/Twilio-Dev-Ed/blog-tfa-servlets/tree/no-tfa</a>
+
+<h3>Understanding TOTP</h3>
+Before we get started with adding two-factor authentication to this example application, let's take a quick detour and to learn more about how TOTP works.
+
+As you'll find on Wikipedia, <a href="http://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm">TOTP</a> "is an extension of the HMAC-based One Time Password algorithm HOTP to support a time based moving factor."
+
+Based on that involved explanation, you might be surprised to find that generating a one time token with TOTP is not actually very complicated. Here is how you generate a 6 digit TOTP code:
+<ol>
+  <li>Compute the 20 byte HMAC of a "shared secret" and a timecode using HMAC-SHA1.</li>
+  <li>Deterministically select an offset inside of that 20 byte HMAC.</li>
+  <li>Starting at the offset, select a 4 byte range from the 20 byte HMAC.</li>
+  <li>Turn the 4 byte range into an integer.</li>
+  <li>Divide that integer by 1,000,000 (or "10**6", the "6" is the number of digits in the TOTP code)</li>
+  <li>The remainder of that division is the 6 digit code - the TOTP code</li>
+</ol>
+If that isn't making sense, try taking a look at <a href="http://tools.ietf.org/html/rfc6238">RFC 6238</a> and this simple implementation of TOTP in Java below. If needed, you can cut and paste this code into a script and run it from your command line:
+
+&nbsp;
+
+&nbsp;
+<h3>Adding Two-Factor Authentication</h3>
+Now that you have a better understanding of how TOTP works, let's see how we would add it to the example web application that we started with. The first place that we'll be touching in our example above is the <i>IndexServlet</i> class, here's what it looks like when it is modified to support logging in with two-factor authentication:
+
+[code language="java"]
+@Singleton
+public class IndexServlet extends HttpServlet {
+
+  private LogIn logIn;
+
+  @Inject
+  public IndexServlet(LogIn logIn) {
+    this.logIn = logIn;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String username = req.getParameter("username");
+    String password = req.getParameter("password");
+
+    try {
+      User user = logIn.exec(username, password);
+      if (user.isTFAEnabled()) {
+        req.getSession().setAttribute("username", username);
+        req.getSession().setAttribute("stage", "password-validated");
+        resp.sendRedirect("/verify-tfa/");
+      } else {
+        req.getSession().setAttribute("user", user);
+        resp.sendRedirect("/user/");
+      }
+
+    } catch (DomainException e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
+    }
+  }
+
+}
+[/code]
+
+This should all look very familiar, it's all the same code as before, with some modifications at the end.
+
+Let's go over these modifications in a little more detail.
+
+Here is the code that we started out with. No big changes here.
+
+[code language="java"]
+@Singleton
+public class IndexServlet extends HttpServlet {
+
+  private LogIn logIn;
+
+  @Inject
+  public IndexServlet(LogIn logIn) {
+    this.logIn = logIn;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/index.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String username = req.getParameter("username");
+    String password = req.getParameter("password");
+
+    try {
+      User user = logIn.exec(username, password);
+      req.getSession().setAttribute("user", user);
+      resp.sendRedirect("/user/");
+    } catch (DomainException e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/index.jsp");
+    }
+  }
+
+}
+[/code]
+
+Here is where we add our modifications. We start by checking to see if the user has one enabled two-factor authentication on their account via an app or SMS.
+
+[code language="java"]
+if (user.isTFAEnabled()) {
+  req.getSession().setAttribute("username", username);
+  req.getSession().setAttribute("stage", "password-validated");
+  resp.sendRedirect("/verify-tfa/");
+} else {
+  req.getSession().setAttribute("user", user);
+  resp.sendRedirect("/user/");
+}
+[/code]
+
+If TFA with TOTP is enabled, we record the fact that the user's password has been validated into the session state, and redirect the user's browser to "/verify-tfa/".
+
+Otherwise, if the user doesn't have any form of two-factor authentication enabled, then we just log them in as before.
+
+In the case where the user has two-factor authentication enabled, they will be redirected to a page to enter in their two-factor authentication token. Here is what the code behind that page looks like:
+
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/application/servlets/VerifyTFAServlet.java">VerifyTFAServlet.java</a>
+[code language="java"]
+@Singleton
+public class VerifyTFAServlet extends HttpServlet {
+
+  private UserRepository userRepository;
+  private VerifyToken verifyToken;
+  private SendSms sendSms;
+
+  @Inject
+  public VerifyTFAServlet(UserRepository userRepository, VerifyToken verifyToken,
+                          SendSms sendSms) {
+    this.userRepository = userRepository;
+    this.verifyToken = verifyToken;
+    this.sendSms = sendSms;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String username = (String) req.getSession().getAttribute("username");
+    User user = userRepository.findByUsername(username).get();
+
+    sendSms.exec(user);
+
+    req.setAttribute("user", user);
+    req.getRequestDispatcher("/WEB-INF/jsps/verify-tfa.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String username = (String) req.getSession().getAttribute("username");
+    try {
+      if (isEmpty(username)) {
+        req.setAttribute("errorMessage", "Error - no username");
+      } else if (!"password-validated".equals(req.getSession().getAttribute("stage"))) {
+        req.setAttribute("errorMessage", "Password is not validated");
+      } else {
+        User user = userRepository.findByUsername(username).get();
+        req.setAttribute("user", user);
+        String token = req.getParameter("token");
+        verifyToken.exec(user, token);
+        req.getSession().setAttribute("user", user);
+        req.getSession().setAttribute("stage", "logged-in");
+        resp.sendRedirect("/user/");
+      }
+    } catch (Exception e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/verify-tfa.jsp");
+    }
+  }
+
+}
+[/code]
+
+And here's what that code does. Again, this is doGet method that handles GET requests to the "/verify-tfa/" path. When it happens, we send the user an SMS with their token (if they have that configured) and then render the page prompting the user to enter their token.
+
+[code language="java"]
+protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+  throws ServletException, IOException {
+
+  String username = (String) req.getSession().getAttribute("username");
+  User user = userRepository.findByUsername(username).get();
+
+  sendSms.exec(user);
+
+  req.setAttribute("user", user);
+  req.getRequestDispatcher("/WEB-INF/jsps/verify-tfa.jsp").forward(req, resp);
+}
+[/code]
+
+To handle POST request, the method does some sanity checking on the session data. We should never actually get into a state where this code will run, it's here Just In Case.
+
+[code language="java"]
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+  throws ServletException, IOException {
+
+  String username = (String) req.getSession().getAttribute("username");
+  try {
+    if (isEmpty(username)) {
+      req.setAttribute("errorMessage", "Error - no username");
+    } else if (!"password-validated".equals(req.getSession().getAttribute("stage"))) {
+      req.setAttribute("errorMessage", "Password is not validated");
+    } else {
+      // log in ...
+    }
+  } catch (Exception e) {
+    ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/verify-tfa.jsp");
+  }
+}
+[/code]
+
+If we reach out to the else statement, after retrieve the users, we verify if the submitted token is valid. If it is, log the user in and send them to their user page! If it is invalid, the catch statement should handle the exception properly.
+
+[code language="java"]
+// ...
+else {
+  User user = userRepository.findByUsername(username).get();
+  req.setAttribute("user", user);
+  String token = req.getParameter("token");
+  verifyToken.exec(user, token);
+  req.getSession().setAttribute("user", user);
+  req.getSession().setAttribute("stage", "logged-in");
+  resp.sendRedirect("/user/");
+}
+// ...
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/domain/services/VerifyToken.java">VerifyToken.java</a>
+[code language="java"]
+// some imports
+
+@Singleton
+public class VerifyToken {
+
+  public void exec(User user, @NotEmpty(message = "Token cannot be empty") String token) {
+    Totp totp = new Totp(user.getTotpSecret());
+    if (!totp.verify(token)) {
+      throw new DomainException("There was an error verifying your token. Please try again.");
+    }
+  }
+}
+[code]
+
+<h3>Adding Google Authenticator</h3>
+Now that we have code to add TOTP authentication to the login process, let's take a look at how we'll get our users to enable TOTP authentication on their account.
+
+Keep in mind that you don't have to use Google Authenticator for this to work. TOTP is an IETF standard and has many different <a href="http://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm#Client_Implementations">client implementations</a>.
+
+I'm using Google Authenticator in this example because it seems to be the most widely used TOTP client at this time. Let's get started.
+
+Here is the basic overview of how this part works:
+<ul>
+  <li>The user visits a page to add Google Authenticator to their account.</li>
+  <li>The page contains a QR code that the user scans with Google Authenticator.</li>
+  <li>After scanning the QR code, the user will enter the 6 digit token that Google Authenticator displays</li>
+</ul>
+This is what the page will look like: <img src="http://www.twilio.com/blog/wp-content/uploads/2013/04/enable-google-authenticator.png" alt="" />
+
+And here is the code that handles takes the 6 digit token and adds it to the user's account.
+
+<a href="https://raw.githubusercontent.com/TwilioDevEd/blog-tfa-servlets/master/src/main/java/com/twilio/blogtfa/application/servlets/EnableTfaViaAppServlet.java">EnableTfaViaAppServlet.java</a>
+[code language="java"]
+@Singleton
+public class EnableTfaViaAppServlet extends HttpServlet {
+
+  private EnableTfaViaApp enableTfaViaApp;
+
+  @Inject
+  public EnableTfaViaAppServlet(EnableTfaViaApp enableTfaViaApp) {
+    this.enableTfaViaApp = enableTfaViaApp;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-app.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    String token = req.getParameter("token");
+    User user = (User) req.getSession().getAttribute("user");
+    try {
+      req.getSession().setAttribute("user", enableTfaViaApp.exec(user, token));
+      req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-app.jsp").forward(req, resp);
+    } catch (Exception e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/enable-tfa-via-app.jsp");
+    }
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/domain/services/EnableTfaViaApp.java">EnableTfaViaApp.java</a>
+
+[code language="java"]
+@Singleton
+public class EnableTfaViaApp {
+
+  private VerifyToken verifyToken;
+  private UserRepository userRepository;
+
+  @Inject
+  public EnableTfaViaApp(VerifyToken verifyToken, UserRepository userRepository) {
+    this.verifyToken = verifyToken;
+    this.userRepository = userRepository;
+  }
+
+  @Transactional
+  public User exec(@NotNull User user, @NotEmpty String token) {
+    verifyToken.exec(user, token);
+    user.setTotpEnabledViaApp(true);
+    return userRepository.save(user);
+  }
+
+}
+[code]
+
+By this point, you should be familiar with the first part of this function.
+
+Starting on the <i>verifyToken.exec</i> statement, we check to see if the token that the user entered is valid, this is an important step that makes sure that the user set up Google Authenticator correctly.
+
+Once we know that the token is valid, we update a flag on the user's account and save the update. The details of how this data is persisted will differ from application to application, so we don't cover those details in this tutorial.
+
+If there was an error with the token, notify the user and ask them to try again.
+
+Finally, I wanted to show you how I generate the QR code. I'm generating my own QR code to avoid sending the shared secret to another service and reduce the risk of leaking the shared secret in a plaintext string.
+
+Each account in Google Authenticator has an account name, so in this section we create a globally unique name for our user and then have our totp object make us an image with the QR code that will contain that account name and the TOTP shared secret for that account.
+
+When we call "QRCode.from(otpauthUrl).withSize(300, 300).to(ImageType.PNG).stream();", it generates the a ByteArrayOutputStream object, and then we write its content in the response.
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/application/servlets/AuthQrCodePngServlet.java">AuthQrCodePngServlet.java</a>
+
+[code language="java"]
+@Singleton
+public class AuthQrCodePngServlet extends HttpServlet {
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    User user = (User) req.getSession().getAttribute("user");
+    String secret = user.getTotpSecret();
+    Totp totp = new Totp(secret);
+    String otpauthUrl = totp.uri(user.getUsername());
+
+    ByteArrayOutputStream out = QRCode.from(otpauthUrl)
+      .withSize(300, 300).to(ImageType.PNG).stream();
+
+    resp.setContentType("image/png");
+    resp.setContentLength(out.size());
+    OutputStream os = resp.getOutputStream();
+    os.write(out.toByteArray());
+    os.flush();
+    os.close();
+  }
+
+}
+[/code]
+
+As I noted earlier, I'm glossing over several things here. I'm not showing you how I persist the user objects and I'm not showing you the HTML that gets sent to the user. If you're wondering what those look like, take a look at the full source over here: <a href="https://github.com/TwilioDevEd/blog-tfa-servlets">https://github.com/TwilioDevEd/blog-tfa-servlets</a>
+
+<h3>Adding Twilio</h3>
+Once we've added support for Google Authenticator, it's just a small additional step to give our users the ability to receive TOTP tokens on their phones via SMS. The procedure for adding SMS based two-factor authentication is very similar to adding support for Google Authenticator. The main difference is that instead of having our users scan a QR code, we have them enter in their mobile phone number.
+
+Here is what this page looks like:
+<img src="http://www.twilio.com/blog/wp-content/uploads/2013/04/enable-twilio-sms.png" alt="" />
+
+And here is the code that powers the page above.
+
+[code language="java"]
+@Singleton
+public class EnableTfaViaSmsServlet extends HttpServlet {
+
+  private static final String SMS_SENT_SUCCESS_MESSAGE = "An SMS has been sent to the "
+    + "phone number you entered. When you get the SMS, enter the code in the SMS where "
+    + "it says \"Enter your verification code\" below.";
+
+  private SendSms sendSms;
+  private EnableTfaViaSms enableTfaViaSms;
+  private ConfigurePhoneNumber configurePhoneNumber;
+
+  @Inject
+  public EnableTfaViaSmsServlet(
+    SendSms sendSms, EnableTfaViaSms enableTfaViaSms, ConfigurePhoneNumber configurePhoneNumber) {
+    this.sendSms = sendSms;
+    this.enableTfaViaSms = enableTfaViaSms;
+    this.configurePhoneNumber = configurePhoneNumber;
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    final User user = (User) req.getSession().getAttribute("user");
+    sendSms.exec(user);
+    req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-sms.jsp").forward(req, resp);
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+
+    final String phoneNumber = req.getParameter("phoneNumber");
+    final String token = req.getParameter("token");
+    final User user = (User) req.getSession().getAttribute("user");
+    try {
+      if (!isEmpty(phoneNumber)) {
+        configurePhoneNumber.exec(user, phoneNumber);
+        sendSms.exec(user);
+        req.setAttribute("successMessage", SMS_SENT_SUCCESS_MESSAGE);
+      } else {
+        req.getSession().setAttribute("user", enableTfaViaSms.exec(user, token));
+      }
+      req.getRequestDispatcher("/WEB-INF/jsps/enable-tfa-via-sms.jsp").forward(req, resp);
+    } catch (Exception e) {
+      ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/enable-tfa-via-sms.jsp");
+    }
+  }
+
+}
+[/code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/domain/services/EnableTfaViaSms.java"></a>
+[code language="java"]
+@Singleton
+public class EnableTfaViaSms {
+
+  private UserRepository userRepository;
+  private VerifyToken verifyToken;
+
+  @Inject
+  public EnableTfaViaSms(UserRepository userRepository, VerifyToken verifyToken) {
+    this.userRepository = userRepository;
+    this.verifyToken = verifyToken;
+  }
+
+  @Transactional
+  public User exec(User user, String token) {
+    verifyToken.exec(user, token);
+    user.setTotpEnabledViaSms(true);
+    return userRepository.save(user);
+  }
+
+}
+[code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/domain/services/ConfigurePhoneNumber.java"></a>
+[code language="java"]
+@Singleton
+public class ConfigurePhoneNumber {
+
+  private UserRepository userRepository;
+
+  @Inject
+  public ConfigurePhoneNumber(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  @Transactional
+  public User exec(User user, String phoneNumber) {
+    user.setPhoneNumber(phoneNumber);
+    return userRepository.save(user);
+  }
+
+}
+[code]
+
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/infrastructure/services/TwilioSMSSender.java">TwilioSMSSender.java</a>
+[code language="java"]
+@Singleton
+public class TwilioSMSSender implements SendSms {
+
+  private static final Logger LOGGER = getLogger(TwilioSMSSender.class);
+  private static final String QUEUED = "queued";
+
+  private final String twilioPhoneNumber;
+  private final MessageFactory messageFactory;
+
+  @Inject
+  public TwilioSMSSender(@Named("TWILIO_PHONE_NUMBER") String twilioPhoneNumber,
+                         MessageFactory messageFactory) {
+    this.twilioPhoneNumber = twilioPhoneNumber;
+    this.messageFactory = messageFactory;
+  }
+
+  @Override
+  public boolean exec(User user) {
+    if (isEmpty(user.getPhoneNumber())) {
+      return false;
+    }
+
+    try {
+      final String token = new Totp(user.getTotpSecret()).now();
+      LOGGER.info("Generated token is {}", token);
+      final List<NameValuePair> params = asList(
+        new BasicNameValuePair("To", user.getPhoneNumber()),
+        new BasicNameValuePair("From", twilioPhoneNumber),
+        new BasicNameValuePair("Body", format("Use this code to log in: %s", token))
+      );
+      Message sms = messageFactory.create(params);
+      return QUEUED.equals(sms.getStatus());
+    } catch (TwilioRestException e) {
+      LOGGER.warn(format("Error on sending message to %s", user.getPhoneNumber()), e);
+      return false;
+    }
+  }
+
+}
+[code]
+
+
+In the servlet code, we check to see if we got a phone number in the "POST" request.
+
+If so, we take the phone number and send an SMS with the TOTP code to that phone number.
+
+The user should have received an SMS with their TOTP code and then entered that code into the page. In this part of the code, we check to see if we were give a token and see if that token is valid. If the token is valid, we enable two-factor authentication for this account and save that setting. As I said in the section on adding Google Authenticator, the details of how to persist the user settings will be unique to your situation, so I don't cover that here. If there was an error validating the token, then we notify the user of that error via a flag that will be checked by our HTML template.
+
+<h3>Summary</h3>
+In this article, we showed you an example of a simple web application written in Java/Servlets. We showed you how to add two-factor authentication to that application. Finally, we showed you how you would enable your users to use Google Authenticator or SMS to authenticate to that modified application.
+
+What I didn't cover is the HTML that I used in this example or how I saved the user data.
+
+To really understand what is going on, I suggest that you try out the example I have running online and then look at the code.
+<h3>Try it out yourself</h3>
+If you want to see what this all looks like, here is a copy of the code running online for you to try out: <a href="http://twilio-tfa.herokuapp.com">http://twilio-tfa.herokuapp.com</a>
+
+All of the source code for this example is also available on GitHub: <a href="https://github.com/TwilioDevEd/blog-tfa-servlets">https://github.com/TwilioDevEd/blog-tfa-servlets</a>
+
+Thanks for reading.
+
+Please let me know if you have any additional questions, feedback or patches.
