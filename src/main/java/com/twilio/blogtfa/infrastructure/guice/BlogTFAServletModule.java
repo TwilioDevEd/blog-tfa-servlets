@@ -2,6 +2,7 @@ package com.twilio.blogtfa.infrastructure.guice;
 
 import com.google.inject.persist.PersistFilter;
 import com.google.inject.servlet.ServletModule;
+import com.twilio.blogtfa.application.filters.AuthenticationFilter;
 import com.twilio.blogtfa.application.servlets.AuthQrCodePngServlet;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaAppServlet;
 import com.twilio.blogtfa.application.servlets.EnableTfaViaSmsServlet;
@@ -25,6 +26,11 @@ class BlogTFAServletModule extends ServletModule {
   @Override
   public void configureServlets() {
     filter("/*").through(PersistFilter.class);
+
+    filter("/auth-qr-code.png").through(AuthenticationFilter.class);
+    filter("/enable-tfa-via-app/").through(AuthenticationFilter.class);
+    filter("/enable-tfa-via-sms/").through(AuthenticationFilter.class);
+    filter("/user/").through(AuthenticationFilter.class);
 
     serve("/").with(IndexServlet.class);
     serve("/user/").with(UserServlet.class);
