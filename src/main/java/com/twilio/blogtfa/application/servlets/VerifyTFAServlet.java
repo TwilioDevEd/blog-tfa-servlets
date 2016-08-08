@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import com.twilio.blogtfa.application.util.ServletUtil;
 import com.twilio.blogtfa.domain.models.User;
 import com.twilio.blogtfa.domain.repositories.UserRepository;
+import com.twilio.blogtfa.domain.services.SendSms;
 import com.twilio.blogtfa.domain.services.VerifyToken;
 
 import javax.servlet.ServletException;
@@ -20,11 +21,14 @@ public class VerifyTFAServlet extends HttpServlet {
 
   private UserRepository userRepository;
   private VerifyToken verifyToken;
+  private SendSms sendSms;
 
   @Inject
-  public VerifyTFAServlet(UserRepository userRepository, VerifyToken verifyToken) {
+  public VerifyTFAServlet(UserRepository userRepository, VerifyToken verifyToken,
+                          SendSms sendSms) {
     this.userRepository = userRepository;
     this.verifyToken = verifyToken;
+    this.sendSms = sendSms;
   }
 
   @Override
@@ -32,7 +36,11 @@ public class VerifyTFAServlet extends HttpServlet {
     throws ServletException, IOException {
 
     String username = (String) req.getSession().getAttribute("username");
-    req.setAttribute("user", userRepository.findByUsername(username).get());
+    User user = userRepository.findByUsername(username).get();
+
+    sendSms.exec(user);
+
+    req.setAttribute("user", user);
     req.getRequestDispatcher("/WEB-INF/jsps/verify-tfa.jsp").forward(req, resp);
   }
 
