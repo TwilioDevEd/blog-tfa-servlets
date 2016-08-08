@@ -25,16 +25,17 @@ public class SignUpServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
+
     req.getRequestDispatcher("/WEB-INF/jsps/sign-up.jsp").forward(req, resp);
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException {
-
     String username = req.getParameter("username");
     String password1 = req.getParameter("password1");
     String password2 = req.getParameter("password2");
+
     try {
       req.getSession().setAttribute("user", signUp.exec(username, password1, password2));
       resp.sendRedirect("/user/");
@@ -42,4 +43,5 @@ public class SignUpServlet extends HttpServlet {
       ServletUtil.handleException(e, req, resp, "/WEB-INF/jsps/sign-up.jsp");
     }
   }
+
 }

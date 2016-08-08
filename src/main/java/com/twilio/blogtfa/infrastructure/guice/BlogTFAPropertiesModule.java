@@ -15,4 +15,5 @@ class BlogTFAPropertiesModule extends AbstractModule {
   protected void configure() {
     Names.bindProperties(binder(), blogTFAProperties);
   }
+
 }

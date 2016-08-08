@@ -22,14 +22,17 @@ public class UserJpaRepository implements UserRepository {
   @Override
   public User save(final User user) {
     EntityManager entityManager = entityManagerProvider.get();
+
     User merge = entityManager.merge(user);
     entityManager.flush();
+
     return merge;
   }
 
   @Override
   public Optional<User> findByUsername(String username) {
     EntityManager entityManager = entityManagerProvider.get();
+
     return entityManager
       .createQuery("SELECT u FROM User u WHERE u.username = :username")
       .setParameter("username", username.toLowerCase())
@@ -41,6 +44,7 @@ public class UserJpaRepository implements UserRepository {
   @Override
   public void deleteAll() {
     EntityManager entityManager = entityManagerProvider.get();
+
     entityManager
       .createQuery("SELECT u FROM User u")
       .getResultList()

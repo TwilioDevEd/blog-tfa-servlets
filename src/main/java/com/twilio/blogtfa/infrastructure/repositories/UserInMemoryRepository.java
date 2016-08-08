@@ -30,4 +30,5 @@ public class UserInMemoryRepository implements UserRepository {
   public void deleteAll() {
     users.clear();
   }
+
 }

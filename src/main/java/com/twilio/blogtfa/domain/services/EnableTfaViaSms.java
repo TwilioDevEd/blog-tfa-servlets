@@ -24,4 +24,5 @@ public class EnableTfaViaSms {
     user.setTotpEnabledViaSms(true);
     return userRepository.save(user);
   }
+
 }

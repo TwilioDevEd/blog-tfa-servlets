@@ -22,6 +22,7 @@ import static com.twilio.blogtfa.infrastructure.guice.BlogTFAProperties.TWILIO_A
 import static com.twilio.blogtfa.infrastructure.guice.BlogTFAProperties.TWILIO_AUTH_TOKEN;
 
 public class BlogTFAServiceModule extends AbstractModule {
+
   private BlogTFAProperties blogTFAProperties;
 
   public BlogTFAServiceModule(BlogTFAProperties blogTFAProperties) {
@@ -53,4 +54,5 @@ public class BlogTFAServiceModule extends AbstractModule {
     final Account account = client.getAccount();
     return account.getMessageFactory();
   }
+
 }

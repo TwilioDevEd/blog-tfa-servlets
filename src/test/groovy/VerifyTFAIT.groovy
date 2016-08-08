@@ -17,8 +17,10 @@ class VerifyTFAIT extends GebReportingSpec {
     go "${baseURI}"
     $('form').username = 'user.app_no.sms_no'
     $('form').password = 'password'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#logged_in').text() == 'You are logged in.'
@@ -29,8 +31,10 @@ class VerifyTFAIT extends GebReportingSpec {
     go "${baseURI}"
     $('form').username = 'user.app_no.sms_yes'
     $('form').password = 'password'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#send-sms-again-link').text() == 'Send me an SMS with my verification code again.'
@@ -42,8 +46,10 @@ class VerifyTFAIT extends GebReportingSpec {
     go "${baseURI}"
     $('form').username = 'user.app_yes.sms_no'
     $('form').password = 'password'
+
     when:
     $('form button[type=submit]').click()
+
     then:
     $('#error_message').text() == null
     $('#verify-tfa-link').text() == null

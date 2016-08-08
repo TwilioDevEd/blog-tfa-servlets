@@ -10,12 +10,12 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <!-- Le styles -->
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/2.3.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
       body { padding-top: 60px; /* 60px to make the container go all the way
       to the bottom of the topbar */ }
     </style>
-    <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/2.3.0/css/bootstrap-responsive.min.css" rel="stylesheet">
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js">
@@ -55,7 +55,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
     </script>
-    <script src="/static/js/bootstrap.js">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/2.3.0/js/bootstrap.min.js">
     </script>
   </body>
 </html>

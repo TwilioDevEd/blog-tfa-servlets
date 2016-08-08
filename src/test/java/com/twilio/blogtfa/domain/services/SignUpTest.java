@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 public class SignUpTest {
 
   private SignUp signUp;
+
   private UserInMemoryRepository userRepository;
 
   @Before
@@ -52,4 +53,5 @@ public class SignUpTest {
     User user = this.signUp.exec("newuser", "password", "password");
     assertThat(user.getId(), is(notNullValue()));
   }
+
 }

@@ -18,8 +18,10 @@ class LogoutIT extends GebReportingSpec {
     $('form').username = 'user'
     $('form').password = 'password'
     $('form button[type=submit]').click()
+
     when:
     $('#logout').click();
+
     then:
     $('#logout').text() == null;
     $('.well div h1').text() == 'Don\'t have an account?'
