@@ -186,7 +186,7 @@ public class UserServlet extends HttpServlet {
 }
 [/code]
 
-<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/models/User.java>User.java</a>:
+<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/models/User.java">User.java</a>:
 
 [code language="java"]
 // imports ...
@@ -240,14 +240,6 @@ public class User {
   // etc...
 
 }
-[/code]
-
-<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
-
-[code language="java"]
-// imports ...
-
-
 [/code]
 
 <a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/domain/repositories/UserRepository.java">UserRepository.java</a>:
@@ -328,22 +320,6 @@ public class SignUp {
   }
 
 }
-[/code]
-
-<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
-
-[code language="java"]
-// imports ...
-
-
-[/code]
-
-<a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/no-tfa/src/main/java/com/twilio/blogtfa/application/servlets/IndexServlet.java">IndexServlet.java</a>:
-
-[code language="java"]
-// imports ...
-
-
 [/code]
 
 <a href="https://raw.githubusercontent.com/TwilioDevEd/blog-tfa-servlets/no-tfa/src/main/java/com/twilio/blogtfa/infrastructure/guice/BlogTFAServletModule.java">BlogTFAServletModule.java</a>:
@@ -458,7 +434,7 @@ public class LogIn {
 
 The rest of the code in this example deals with including additional libraries, setting up the application, defining the User model and handling other website functionality.
 
-You can see the full source on GitHub here: <a href="https://github.com/Twilio-Dev-Ed/blog-tfa-servlets/tree/no-tfa">https://github.com/Twilio-Dev-Ed/blog-tfa-servlets/tree/no-tfa</a>
+You can see the full source on GitHub here: <a href="https://github.com/TwilioDevEd/blog-tfa-servlets/tree/no-tfa">https://github.com/TwilioDevEd/blog-tfa-servlets/tree/no-tfa</a>
 
 <h3>Understanding TOTP</h3>
 Before we get started with adding two-factor authentication to this example application, let's take a quick detour and to learn more about how TOTP works.
@@ -474,11 +450,132 @@ Based on that involved explanation, you might be surprised to find that generati
   <li>Divide that integer by 1,000,000 (or "10**6", the "6" is the number of digits in the TOTP code)</li>
   <li>The remainder of that division is the 6 digit code - the TOTP code</li>
 </ol>
-If that isn't making sense, try taking a look at <a href="http://tools.ietf.org/html/rfc6238">RFC 6238</a> and this simple implementation of TOTP in Java below. If needed, you can cut and paste this code into a script and run it from your command line:
+If that isn't making sense, try taking a look at <a href="http://tools.ietf.org/html/rfc6238">RFC 6238</a> and this simple implementation of TOTP in Java below.
 
+<a href="https://github.com/aerogear/aerogear-otp-java/blob/master/src/main/java/org/jboss/aerogear/security/otp/Totp.java">Totp.java</a>
+[code language="java"]
+// from https://github.com/aerogear/aerogear-otp-java
+public class Totp {
+
+    private final String secret;
+    private final Clock clock;
+    private static final int DELAY_WINDOW = 1;
+
+    /**
+     * Initialize an OTP instance with the shared secret generated on Registration process
+     *
+     * @param secret Shared secret
+     */
+    public Totp(String secret) {
+        this.secret = secret;
+        clock = new Clock();
+    }
+
+    /**
+     * Initialize an OTP instance with the shared secret generated on Registration process
+     *
+     * @param secret Shared secret
+     * @param clock  Clock responsible for retrieve the current interval
+     */
+    public Totp(String secret, Clock clock) {
+        this.secret = secret;
+        this.clock = clock;
+    }
+
+    /**
+     * Prover - To be used only on the client side
+     * Retrieves the encoded URI to generated the QRCode required by Google Authenticator
+     *
+     * @param name Account name
+     * @return Encoded URI
+     */
+    public String uri(String name) {
+        try {
+            return String.format("otpauth://totp/%s?secret=%s", URLEncoder.encode(name, "UTF-8"), secret);
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Retrieves the current OTP
+     *
+     * @return OTP
+     */
+    public String now() {
+        return leftPadding(hash(secret, clock.getCurrentInterval()));
+    }
+
+    /**
+     * Verifier - To be used only on the server side
+     * <p/>
+     * Taken from Google Authenticator with small modifications from
+     * {@see <a href="http://code.google.com/p/google-authenticator/source/browse/src/com/google/android/apps/authenticator/PasscodeGenerator.java?repo=android#212">PasscodeGenerator.java</a>}
+     * <p/>
+     * Verify a timeout code. The timeout code will be valid for a time
+     * determined by the interval period and the number of adjacent intervals
+     * checked.
+     *
+     * @param otp Timeout code
+     * @return True if the timeout code is valid
+     *         <p/>
+     *         Author: sweis@google.com (Steve Weis)
+     */
+    public boolean verify(String otp) {
+
+        long code = Long.parseLong(otp);
+        long currentInterval = clock.getCurrentInterval();
+
+        int pastResponse = Math.max(DELAY_WINDOW, 0);
+
+        for (int i = pastResponse; i >= 0; --i) {
+            int candidate = generate(this.secret, currentInterval - i);
+            if (candidate == code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int generate(String secret, long interval) {
+        return hash(secret, interval);
+    }
+
+    private int hash(String secret, long interval) {
+        byte[] hash = new byte[0];
+        try {
+            //Base32 encoding is just a requirement for google authenticator. We can remove it on the next releases.
+            hash = new Hmac(Hash.SHA1, Base32.decode(secret), interval).digest();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (Base32.DecodingException e) {
+            e.printStackTrace();
+        }
+        return bytesToInt(hash);
+    }
+
+    private int bytesToInt(byte[] hash) {
+        // put selected bytes into result int
+        int offset = hash[hash.length - 1] & 0xf;
+
+        int binary = ((hash[offset] & 0x7f) << 24) |
+                ((hash[offset + 1] & 0xff) << 16) |
+                ((hash[offset + 2] & 0xff) << 8) |
+                (hash[offset + 3] & 0xff);
+
+        return binary % Digits.SIX.getValue();
+    }
+
+    private String leftPadding(int otp) {
+        return String.format("%06d", otp);
+    }
+
+}
+[/code]
 &nbsp;
 
-&nbsp;
 <h3>Adding Two-Factor Authentication</h3>
 Now that you have a better understanding of how TOTP works, let's see how we would add it to the example web application that we started with. The first place that we'll be touching in our example above is the <i>IndexServlet</i> class, here's what it looks like when it is modified to support logging in with two-factor authentication:
 
@@ -713,7 +810,7 @@ public class VerifyToken {
     }
   }
 }
-[code]
+[/code]
 
 <h3>Adding Google Authenticator</h3>
 Now that we have code to add TOTP authentication to the login process, let's take a look at how we'll get our users to enable TOTP authentication on their account.
@@ -791,7 +888,7 @@ public class EnableTfaViaApp {
   }
 
 }
-[code]
+[/code]
 
 By this point, you should be familiar with the first part of this function.
 
@@ -921,7 +1018,7 @@ public class EnableTfaViaSms {
   }
 
 }
-[code]
+[/code]
 
 <a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/domain/services/ConfigurePhoneNumber.java"></a>
 [code language="java"]
@@ -942,7 +1039,7 @@ public class ConfigurePhoneNumber {
   }
 
 }
-[code]
+[/code]
 
 <a href="https://github.com/TwilioDevEd/blog-tfa-servlets/blob/master/src/main/java/com/twilio/blogtfa/infrastructure/services/TwilioSMSSender.java">TwilioSMSSender.java</a>
 [code language="java"]
@@ -985,7 +1082,7 @@ public class TwilioSMSSender implements SendSms {
   }
 
 }
-[code]
+[/code]
 
 
 In the servlet code, we check to see if we got a phone number in the "POST" request.
