@@ -34,7 +34,7 @@ dependencies {
   compile 'org.xerial:sqlite-jdbc:3.8.11.2'
   compile 'de.svenkubiak:jBCrypt:0.4'
   compile 'ru.vyarus:guice-validator:1.2.0'
-  compile 'org.hibernate:hibernate-validator:5.2.4.Final'
+  compile 'org.hibernate:hibernate-validator:6.1.6.Final'
   compile 'javax.el:el-api:2.2.1-b04'
   compile 'org.jboss.aerogear:aerogear-otp-java:1.0.0'
   compile 'net.glxn:qrgen:1.4'
