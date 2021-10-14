@@ -4,7 +4,7 @@
 
 # Blog TFA Post - Java/Servlets
 
-[![Build Status](https://travis-ci.org/TwilioDevEd/blog-tfa-servlets.svg?branch=master)](https://travis-ci.org/TwilioDevEd/blog-tfa-servlets)
+[![Java Servlet CI](https://github.com/TwilioDevEd/blog-tfa-servlets/actions/workflows/gradle.yml/badge.svg)](https://github.com/TwilioDevEd/blog-tfa-servlets/actions/workflows/gradle.yml)
 
 ### Prerequisites
 
