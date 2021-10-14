@@ -34,8 +34,4 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Run tests
-        env:
-          TWILIO_ACCOUNT_SID: my-sid
-          TWILIO_AUTH_TOKEN: my-token
-          TWILIO_PHONE_NUMBER: my-phone-number
         run: ./gradlew acceptanceTest
