@@ -1,0 +1,25 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/."
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.google.inject.extensions:guice-persist
+    versions:
+    - 4.2.3
+    - 5.0.0
+  - dependency-name: com.google.inject.extensions:guice-servlet
+    versions:
+    - 4.2.3
+    - 5.0.0
+  - dependency-name: org.hibernate:hibernate-validator
+    versions:
+    - 7.0.0.Final
+  - dependency-name: org.eclipse.persistence:org.eclipse.persistence.jpa
+    versions:
+    - 3.0.0
+  - dependency-name: org.codehaus.groovy:groovy-all
+    versions:
+    - 3.0.7
