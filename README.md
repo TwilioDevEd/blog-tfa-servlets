@@ -20,31 +20,30 @@
 1. First clone this repository and `cd` into it.
 
    ```
-   $ git clone git@github.com:TwilioDevEd/blog-tfa-servlets.git
-   $ cd blog-tfa-servlets
+   git clone git@github.com:TwilioDevEd/blog-tfa-servlets.git
+   cd blog-tfa-servlets
    ```
 
 1. Copy the sample configuration file and edit it to match your configuration.
+   ```bash
+   cp .env.example .env
+   ```
 
-  ```bash
-  $ cp .env.example .env
-  ```
-
- You can find your `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` in your
- [Twilio Account Settings](https://www.twilio.com/user/account/settings).
- You will also need a `TWILIO_NUMBER`, which you may find [here](https://www.twilio.com/user/account/phone-numbers/incoming).
+   You can find your `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` in your
+   [Twilio Account Settings](https://www.twilio.com/user/account/settings).
+   You will also need a `TWILIO_NUMBER`, which you may find [here](https://www.twilio.com/user/account/phone-numbers/incoming).
 
 1. Make sure the all tests succeed.
 
-  ```bash
-  $ ./gradlew acceptanceTest
-  ```
+   ```bash
+   ./gradlew acceptanceTest
+   ```
 
 1. Run the application.
 
-  ```bash
-  $ ./gradlew appRun
-  ```
+   ```bash
+   ./gradlew appRun
+   ```
 
 ## Meta
 
