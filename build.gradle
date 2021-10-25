@@ -38,6 +38,7 @@ dependencies {
   compile 'javax.el:el-api:2.2.1-b04'
   compile 'org.jboss.aerogear:aerogear-otp-java:1.0.0'
   compile 'net.glxn:qrgen:1.4'
+  compile 'io.github.cdimascio:dotenv-java:2.2.0'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.codehaus.groovy:groovy-all:3.0.8'
@@ -67,15 +68,4 @@ task integrationTest(type: Test, dependsOn: 'test') {
   doFirst {
     systemProperty 'geb.build.reportsDir', reporting.file('geb')
   }
-}
-
-task acceptanceTest {
-  doFirst {
-    gretty.systemProperty 'TFA_ENV', 'test'
-    gretty.systemProperty 'TWILIO_ACCOUNT_SID', 'my-account-sid'
-    gretty.systemProperty 'TWILIO_AUTH_TOKEN', 'my-auth-token'
-    gretty.systemProperty 'TWILIO_PHONE_NUMBER', 'my-phone-number'
-    gretty.integrationTestTask = 'integrationTest'
-  }
-  finalizedBy integrationTest
 }

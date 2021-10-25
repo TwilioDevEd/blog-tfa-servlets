@@ -1,5 +1,6 @@
 package com.twilio.blogtfa.infrastructure.guice;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,8 @@ import java.util.stream.Stream;
 
 class BlogTFAProperties extends Properties {
 
+  private static Dotenv dotenv = Dotenv.load();
+
   static final Logger LOGGER = LoggerFactory.getLogger(BlogTFAProperties.class);
   static final String TWILIO_ACCOUNT_SID = "TWILIO_ACCOUNT_SID";
   static final String TWILIO_AUTH_TOKEN = "TWILIO_AUTH_TOKEN";
@@ -16,8 +19,8 @@ class BlogTFAProperties extends Properties {
   static final String ENVIRONMENT = "TFA_ENV";
 
   BlogTFAProperties() {
-    this(getProp(TWILIO_ACCOUNT_SID), getProp(TWILIO_AUTH_TOKEN),
-      getProp(TWILIO_PHONE_NUMBER), getProp(ENVIRONMENT));
+    this(dotenv.get(TWILIO_ACCOUNT_SID), dotenv.get(TWILIO_AUTH_TOKEN),
+      dotenv.get(TWILIO_PHONE_NUMBER), dotenv.get(ENVIRONMENT));
   }
 
   BlogTFAProperties(final String accountSid, final String authToken,
@@ -38,8 +41,7 @@ class BlogTFAProperties extends Properties {
     LOGGER.info("ENVIRONMENT={}", environment);
   }
 
-  static String getProp(String key) {
-    return System.getProperty(key) != null ? System.getProperty(key) : System.getenv(key);
+  public static Dotenv getDotenv() {
+    return dotenv;
   }
-
 }

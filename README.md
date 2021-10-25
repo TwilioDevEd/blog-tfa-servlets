@@ -36,7 +36,7 @@
 1. Make sure the all tests succeed.
 
    ```bash
-   ./gradlew acceptanceTest
+   ./gradlew integrationTest
    ```
 
 1. Run the application.

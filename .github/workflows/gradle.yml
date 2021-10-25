@@ -34,4 +34,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Run tests
-        run: ./gradlew acceptanceTest
+        run: |
+          cp .env.example .env
+          ./gradlew integrationTest
