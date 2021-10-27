@@ -40,7 +40,7 @@ dependencies {
   compile 'net.glxn:qrgen:1.4'
   compile 'io.github.cdimascio:dotenv-java:2.2.0'
 
-  testCompile 'junit:junit:4.12'
+  testCompile 'junit:junit:4.13.2'
   testCompile 'org.codehaus.groovy:groovy-all:3.0.8'
   testCompile 'org.spockframework:spock-core:2.0-groovy-3.0'
   testCompile "org.gebish:geb-spock:0.13.1"
