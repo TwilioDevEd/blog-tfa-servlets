@@ -2,6 +2,13 @@
   <img src="https://static0.twilio.com/marketing/bundles/marketing/img/logos/wordmark-red.svg" alt="Twilio" width="250" />
 </a>
 
+
+# Deprecated Tutorial - Please use Twilio Verify
+
+For new development, we encourage you to use the Verify API. The Verify API is an evolution of the Authy API with continued support for SMS, voice, and email one-time passcodes, and an improved developer experience.
+
+For more about Twilio Verify, please visit the [Twilio Verify Docs](https://www.twilio.com/docs/verify)
+
 # Blog TFA Post - Java/Servlets
 
 [![Java Servlet CI](https://github.com/TwilioDevEd/blog-tfa-servlets/actions/workflows/gradle.yml/badge.svg)](https://github.com/TwilioDevEd/blog-tfa-servlets/actions/workflows/gradle.yml)
